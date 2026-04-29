@@ -1,4 +1,4 @@
-package com.bookshop.shared.exception.InvalidTokenException;
+package com.bookshop.shared.exception;
 
 public class InvalidTokenException extends RuntimeException {
     public InvalidTokenException(String message) {

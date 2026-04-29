@@ -1,4 +1,4 @@
-package com.bookshop.entity;
+package com.bookshop.shared.entity;
 
 
 import jakarta.persistence.*;

@@ -45,7 +45,36 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorDetails> handleUserNotFoundException(
+            Exception ex,
+            HttpServletRequest request) {
 
+        ErrorDetails errorDetails = new ErrorDetails(
+                Instant.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "User not found",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ErrorDetails> handleUserAlreadyExistsException(
+            Exception ex,
+            HttpServletRequest request) {
+
+        ErrorDetails errorDetails = new ErrorDetails(
+                Instant.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "User already exists",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
     /**
      * Global Fallback: Catches any other  exceptions to prevent messy stack traces.
      */

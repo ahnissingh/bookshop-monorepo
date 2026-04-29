@@ -45,6 +45,8 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
+
+
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorDetails> handleUserNotFoundException(
             Exception ex,
@@ -60,6 +62,10 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
+
+    /**
+     * Catches when registering already existing user with same email or username
+     */
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<ErrorDetails> handleUserAlreadyExistsException(
             Exception ex,
@@ -75,6 +81,45 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
+
+
+    /**
+     * Catches JJWT library exceptions (Expired, Malformed, Bad Signature, etc.)
+     */
+    @ExceptionHandler(io.jsonwebtoken.JwtException.class)
+    public ResponseEntity<ErrorDetails> handleJwtException(
+            io.jsonwebtoken.JwtException ex,
+            HttpServletRequest request) {
+
+        ErrorDetails errorDetails = new ErrorDetails(
+                Instant.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Invalid or expired token",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Catches Spring's automatic exception when the refreshToken cookie is completely missing
+     */
+    @ExceptionHandler(org.springframework.web.bind.MissingRequestCookieException.class)
+    public ResponseEntity<ErrorDetails> handleMissingCookieException(
+            org.springframework.web.bind.MissingRequestCookieException ex,
+            HttpServletRequest request) {
+
+        ErrorDetails errorDetails = new ErrorDetails(
+                Instant.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Missing required authentication cookie",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+    }
+
+
     /**
      * Global Fallback: Catches any other  exceptions to prevent messy stack traces.
      */

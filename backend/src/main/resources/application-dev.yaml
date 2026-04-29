@@ -15,4 +15,23 @@ spring:
 
 logging:
   level:
+    org.springframework.security: TRACE
     org.hibernate.SQL: DEBUG
+
+
+cors:
+  allowed-origins:
+    - "http://localhost:5173"
+  allowed-methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "OPTIONS"
+  allowed-headers:
+    - "*"
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  access-expiration: 900000 # 15 minutes in milliseconds
+  refresh-expiration: 604800000 # 7 days in milliseconds

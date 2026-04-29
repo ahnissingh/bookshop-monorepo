@@ -1,5 +1,6 @@
 package com.bookshop.shared;
 
+import com.bookshop.BackendApplication;
 import org.springframework.boot.SpringApplication;
 
 public class TestBackendApplication {

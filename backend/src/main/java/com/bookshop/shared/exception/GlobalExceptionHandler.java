@@ -73,13 +73,13 @@ public class GlobalExceptionHandler {
 
         ErrorDetails errorDetails = new ErrorDetails(
                 Instant.now(),
-                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.CONFLICT.value(),
                 "User already exists",
                 ex.getMessage(),
                 request.getRequestURI()
         );
 
-        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
     }
 
 

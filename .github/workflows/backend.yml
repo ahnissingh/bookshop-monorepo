@@ -77,14 +77,14 @@ jobs:
             docker rm mybookshop-backend || true
             
             # 4. Run the new container
-            docker run -d \
-              --name mybookshop-backend \
-              -p 8080:8080 \
-              -e SPRING_PROFILES_ACTIVE=prod \
-              -e SPRING_DATASOURCE_URL="jdbc:mysql://database-1.c7240iwoykau.ap-south-1.rds.amazonaws.com:3306/bookshop_db?allowPublicKeyRetrieval=true&useSSL=true&requireSSL=true" \
-              -e SPRING_DATASOURCE_USERNAME="${{ secrets.DB_USERNAME }}" \
-              -e SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-              -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
-              -e CORS_ALLOWED_ORIGINS="*" \
-              --restart unless-stopped \
-              907260787573.dkr.ecr.ap-south-1.amazonaws.com/ahnis/mybookshop:latest
+                    docker run -d \
+                    --name mybookshop-backend \
+                    -p 8080:8080 \
+                    -e SPRING_PROFILES_ACTIVE=prod \
+                    -e SPRING_DATASOURCE_URL="jdbc:mysql://database-1.c7240iwoykau.ap-south-1.rds.amazonaws.com:3306/bookshop_db?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false" \
+                    -e SPRING_DATASOURCE_USERNAME="${{ secrets.DB_USERNAME }}" \
+                    -e SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+                    -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
+                    -e CORS_ALLOWED_ORIGINS="*" \
+                    --restart unless-stopped \
+                    907260787573.dkr.ecr.ap-south-1.amazonaws.com/ahnis/mybookshop:latest

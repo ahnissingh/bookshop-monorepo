@@ -7,7 +7,6 @@ export default function Layout() {
                 <Link to="/" className="font-bold text-blue-600">Home</Link>
                 <Link to="/dashboard" className="font-bold text-blue-600">Dashboard</Link>
             </nav>
-
             <main className="p-8">
                 <Outlet />
             </main>

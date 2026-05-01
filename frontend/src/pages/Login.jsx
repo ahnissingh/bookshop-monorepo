@@ -16,8 +16,10 @@ export default function Login() {
             // Extract the user data (AuthResponse)
             const userData = response.data.data;
 
-            // 1. Update Redux State
+            // 1.1 Update Redux State
             dispatch(setCredentials(userData));
+            // 1.2 Update local storage just the flag
+            localStorage.setItem('isLoggedIn', 'true');
 
             // 2. Route intelligently based on roles
             if (userData.roles.includes('ROLE_VENDOR')) {

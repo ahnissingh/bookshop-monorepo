@@ -15,8 +15,11 @@ export default function Layout() {
         } catch (error) {
             console.error("Logout API failed, but clearing local state anyway", error);
         } finally {
-            // 2. Clear the Redux "brain"
+            // 2.1 Clear the Redux "brain"
             dispatch(logout());
+            // 2.2 Remove loggedIn flag
+            localStorage.removeItem('isLoggedIn');
+
             // 3. Kick them back to the login page
             navigate('/login');
         }

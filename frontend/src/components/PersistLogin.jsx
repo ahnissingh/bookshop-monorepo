@@ -14,39 +14,39 @@ export default function PersistLogin() {
 
         const verifyRefreshToken = async () => {
             try {
-                // If the HttpOnly cookie is there and valid, backend will return the user data!
                 const response = await api.post('/auth/refresh');
-
                 if (isMounted) {
                     dispatch(setCredentials(response.data.data));
                 }
             } catch (err) {
-                console.error("No valid session found. User must log in.");
-                // We don't throw an alert here, we just let them remain logged out in Redux
+                // If the backend rejects us (let says cookie expired),
+                // we wipe the flag so we don't keep trying on future refreshes
+                localStorage.removeItem('isLoggedIn');
             } finally {
                 if (isMounted) setIsLoading(false);
             }
         };
 
-        // If Redux is empty (e.g. after a refresh), try to fetch the session
-        if (!isAuthenticated) {
+        // Only hit the backend if Redux is empty AND the flag says they should be logged in
+        const isLoggedInFlag = localStorage.getItem('isLoggedIn');
+
+        if (!isAuthenticated && isLoggedInFlag === 'true') {
             verifyRefreshToken();
         } else {
+            // If the flag is missing/false, skip the API call entirely!
             setIsLoading(false);
         }
 
-        return () => isMounted = false; // Cleanup function
+        return () => isMounted = false;
     }, [isAuthenticated, dispatch]);
 
-    // Show a blank screen or a spinner while checking the backend
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <p className="text-gray-600 font-medium">Verifying secure session...</p>
+                <p className="text-gray-500">Loading...</p>
             </div>
         );
     }
 
-    // Once we know who they are (or aren't), render the rest of the app!
     return <Outlet />;
 }

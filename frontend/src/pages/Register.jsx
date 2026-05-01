@@ -20,6 +20,7 @@ export default function Register() {
             const response = await api.post(endpoint, payload);
 
             dispatch(setCredentials(response.data.data));
+            localStorage.setItem('isLoggedIn', 'true');
             navigate(role === 'VENDOR' ? '/dashboard' : '/'); // Vendors go to dashboard, clients to home
         } catch (error) {
             console.error("Registration failed:", error.response?.data?.message || "An error occurred");

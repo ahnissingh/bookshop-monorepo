@@ -24,7 +24,8 @@ public class CookieUtil {
                 .secure(false) // TODO: true in prod
                 .path("/")
                 .maxAge(accessMaxAgeSeconds)
-                .sameSite("Strict")
+                .sameSite("Lax")
+                .domain("bookstacks.store")
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", authResponse.refreshToken())
@@ -32,7 +33,8 @@ public class CookieUtil {
                 .secure(false) // TODO: true in prod
                 .path("/")
                 .maxAge(refreshMaxAgeSeconds)
-                .sameSite("Strict")
+                .sameSite("Lax")
+                .domain("bookstacks.store")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());

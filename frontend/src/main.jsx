@@ -15,6 +15,8 @@ import Register from './pages/Register.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import PersistLogin from './components/PersistLogin.jsx';
 
+
+
 const router = createBrowserRouter([
     {
         // Wrap everything inside PersistLogin

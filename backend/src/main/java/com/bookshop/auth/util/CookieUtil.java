@@ -25,7 +25,7 @@ public class CookieUtil {
                 .path("/")
                 .maxAge(accessMaxAgeSeconds)
                 .sameSite("Lax")
-                .domain("bookstacks.store")
+                .domain(jwtProperties.getCookieDomain())
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", authResponse.refreshToken())
@@ -34,7 +34,7 @@ public class CookieUtil {
                 .path("/")
                 .maxAge(refreshMaxAgeSeconds)
                 .sameSite("Lax")
-                .domain("bookstacks.store")
+                .domain(jwtProperties.getCookieDomain())
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());

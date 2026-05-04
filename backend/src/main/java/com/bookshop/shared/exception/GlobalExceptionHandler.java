@@ -5,6 +5,7 @@ import com.bookshop.shared.dto.ErrorDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -118,6 +119,66 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Catches Spring Security Authorization failures (e.g., missing roles)
+     * Thrown by @PreAuthorize annotations.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorDetails> handleAccessDeniedException(
+            AccessDeniedException ex,
+            HttpServletRequest request) {
+
+        ErrorDetails errorDetails = new ErrorDetails(
+                Instant.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "Forbidden",
+                "You do not have permission to access this resource.",
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
+    }
+
+    /**
+     * Handles missing resources or hidden resources due to ownership violations.
+     * Returns 404 Not Found.
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorDetails> handleResourceNotFoundException(
+            ResourceNotFoundException ex,
+            HttpServletRequest request) {
+
+        ErrorDetails errorDetails = new ErrorDetails(
+                Instant.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "Resource Not Found",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Handles IO failures during file uploads/processing.
+     * Returns 500 Internal Server Error.
+     */
+    @ExceptionHandler(FileProcessingException.class)
+    public ResponseEntity<ErrorDetails> handleFileProcessingException(
+            FileProcessingException ex,
+            HttpServletRequest request) {
+
+        ErrorDetails errorDetails = new ErrorDetails(
+                Instant.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "File Processing Error",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 

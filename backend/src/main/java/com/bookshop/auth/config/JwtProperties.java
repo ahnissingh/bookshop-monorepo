@@ -14,4 +14,5 @@ public class JwtProperties {
     private String secret;
     private Long accessExpiration;
     private Long refreshExpiration;
+    private String cookieDomain;
 }

@@ -1,4 +1,4 @@
-package com.bookshop.auth.integration;
+package com.bookshop.shared;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

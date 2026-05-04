@@ -1,4 +1,4 @@
-package com.bookshop.auth.repository;
+package com.bookshop.shared;
 
 
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;

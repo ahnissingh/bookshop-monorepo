@@ -1,17 +1,16 @@
 package com.bookshop.auth.repository;
 
+import com.bookshop.shared.AbstractBaseRepositoryTest;
 import com.bookshop.shared.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class UserRepositoryTests extends AbstractBaseRepositoryTest{
+public class UserRepositoryTests extends AbstractBaseRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 

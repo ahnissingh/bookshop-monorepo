@@ -1,4 +1,4 @@
-package com.bookshop.vendor.mapper;
+package com.bookshop.shared.mapper;
 
 import com.bookshop.shared.entity.Book;
 import com.bookshop.vendor.dto.BookRequest;

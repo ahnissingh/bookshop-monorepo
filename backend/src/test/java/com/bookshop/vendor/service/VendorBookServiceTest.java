@@ -5,7 +5,7 @@ import com.bookshop.shared.entity.User;
 import com.bookshop.shared.repository.BookRepository;
 import com.bookshop.vendor.dto.BookRequest;
 import com.bookshop.vendor.dto.BookResponse;
-import com.bookshop.vendor.mapper.BookMapper;
+import com.bookshop.shared.mapper.BookMapper;
 import com.bookshop.vendor.service.image.PictureStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

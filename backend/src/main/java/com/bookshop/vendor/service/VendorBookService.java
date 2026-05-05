@@ -6,7 +6,7 @@ import com.bookshop.shared.entity.User;
 import com.bookshop.shared.exception.ResourceNotFoundException;
 import com.bookshop.vendor.dto.BookRequest;
 import com.bookshop.vendor.dto.BookResponse;
-import com.bookshop.vendor.mapper.BookMapper;
+import com.bookshop.shared.mapper.BookMapper;
 import com.bookshop.shared.repository.BookRepository;
 import com.bookshop.vendor.service.image.PictureStorageService;
 import lombok.extern.slf4j.Slf4j;

@@ -1,7 +1,7 @@
 import api from './axiosClient';
 
-export const getMyBooks = (page = 0, size = 10) =>
-    api.get('/vendor/books', { params: { page, size } });
+export const getMyBooks = (page = 0, size = 10, sort = 'createdAt,desc') =>
+    api.get('/vendor/books', { params: { page, size, sort } });
 
 export const getBookById = (id) =>
     api.get(`/vendor/books/${id}`);

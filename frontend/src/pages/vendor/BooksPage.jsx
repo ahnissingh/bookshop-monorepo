@@ -11,7 +11,7 @@ import { addToast } from '../../store/toastSlice';
 
 export default function BooksPage() {
     const dispatch = useDispatch();
-    const { items, totalPages, currentPage, loading, error } = useSelector((state) => state.books);
+    const { items, totalPages, totalElements, currentPage, pageSize, isFirst, isLast, loading, error } = useSelector((state) => state.books);
     const navigate = useNavigate();
 
     const [deleteTarget, setDeleteTarget] = useState(null);
@@ -19,11 +19,11 @@ export default function BooksPage() {
     const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
-        dispatch(fetchBooks({ page: 0, size: 12 }));
+        dispatch(fetchBooks({ page: 0, size: 10, sort: 'createdAt,desc' }));
     }, [dispatch]);
 
     const handlePageChange = (page) => {
-        dispatch(fetchBooks({ page, size: 12 }));
+        dispatch(fetchBooks({ page, size: 10, sort: 'createdAt,desc' }));
     };
 
     const handleDelete = async () => {
@@ -44,7 +44,7 @@ export default function BooksPage() {
         try {
             await dispatch(uploadImageThunk({ id, file })).unwrap();
             dispatch(addToast('Image uploaded successfully', 'success'));
-            dispatch(fetchBooks({ page: currentPage, size: 12 }));
+            dispatch(fetchBooks({ page: currentPage, size: 10, sort: 'createdAt,desc' }));
         } catch (err) {
             dispatch(addToast(err || 'Failed to upload image', 'error'));
         }
@@ -59,7 +59,7 @@ export default function BooksPage() {
             <div className="flex flex-col items-center justify-center py-16">
                 <p className="text-sm text-red-500 dark:text-red-400 mb-4">{error}</p>
                 <button
-                    onClick={() => dispatch(fetchBooks({ page: 0, size: 12 }))}
+                    onClick={() => dispatch(fetchBooks({ page: 0, size: 10, sort: 'createdAt,desc' }))}
                     className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors"
                 >
                     Retry
@@ -122,37 +122,42 @@ export default function BooksPage() {
                         ))}
                     </div>
 
-                    {totalPages > 1 && (
-                        <div className="flex items-center justify-center gap-1 mt-8">
-                            <button
-                                onClick={() => handlePageChange(currentPage - 1)}
-                                disabled={currentPage === 0}
-                                className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Previous
-                            </button>
-                            {Array.from({ length: totalPages }).map((_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => handlePageChange(i)}
-                                    className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
-                                        i === currentPage
-                                            ? 'bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900'
-                                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                                    }`}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => handlePageChange(currentPage + 1)}
-                                disabled={currentPage >= totalPages - 1}
-                                className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Next
-                            </button>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
+                        <div className="text-sm text-slate-500 dark:text-slate-400">
+                            Showing <span className="font-medium text-slate-900 dark:text-slate-50">{(currentPage * pageSize) + 1}</span> to <span className="font-medium text-slate-900 dark:text-slate-50">{Math.min((currentPage + 1) * pageSize, totalElements)}</span> of <span className="font-medium text-slate-900 dark:text-slate-50">{totalElements}</span> items
                         </div>
-                    )}
+                        {totalPages > 1 && (
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={isFirst}
+                                    className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    Previous
+                                </button>
+                                {Array.from({ length: totalPages }).map((_, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handlePageChange(i)}
+                                        className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                                            i === currentPage
+                                                ? 'bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900'
+                                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                        }`}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                ))}
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={isLast}
+                                    className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </>
             )}
 

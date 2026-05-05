@@ -3,9 +3,9 @@ import * as bookApi from '../api/bookApi';
 
 export const fetchBooks = createAsyncThunk(
     'books/fetchBooks',
-    async ({ page = 0, size = 10 }, { rejectWithValue }) => {
+    async ({ page = 0, size = 10, sort = 'createdAt,desc' }, { rejectWithValue }) => {
         try {
-            const response = await bookApi.getMyBooks(page, size);
+            const response = await bookApi.getMyBooks(page, size, sort);
             return response.data.data;
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || 'Failed to fetch books');
@@ -69,6 +69,8 @@ const booksSlice = createSlice({
         totalElements: 0,
         currentPage: 0,
         pageSize: 10,
+        isFirst: true,
+        isLast: true,
         loading: 'idle',
         error: null,
     },
@@ -90,6 +92,8 @@ const booksSlice = createSlice({
                 state.totalElements = action.payload.totalElements;
                 state.currentPage = action.payload.number;
                 state.pageSize = action.payload.size;
+                state.isFirst = action.payload.first;
+                state.isLast = action.payload.last;
             })
             .addCase(fetchBooks.rejected, (state, action) => {
                 state.loading = 'failed';

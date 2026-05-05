@@ -14,6 +14,7 @@ const bookSchema = z.object({
     author: z.string().min(1, 'Author is required'),
     subtitle: z.string().optional().nullable(),
     price: z.preprocess((a) => parseFloat(a), z.number({ invalid_type_error: 'Price must be a number' }).min(0, 'Price must be positive')),
+    quantity: z.preprocess((a) => parseInt(a, 10), z.number({ invalid_type_error: 'Quantity must be a number' }).int('Quantity must be a whole number').min(0, 'Quantity cannot be negative')),
     grade: z.string().min(1, 'Please select a valid grade'),
     description: z.string().optional().nullable(),
 });
@@ -26,6 +27,7 @@ export default function BookForm({ onSubmit, defaultValues, isSubmitting, submit
             author: '',
             subtitle: '',
             price: '',
+            quantity: '',
             grade: '',
             description: '',
         },
@@ -71,7 +73,7 @@ export default function BookForm({ onSubmit, defaultValues, isSubmitting, submit
                 />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                     <label className={labelClass}>Price (₹)</label>
                     <input
@@ -82,6 +84,17 @@ export default function BookForm({ onSubmit, defaultValues, isSubmitting, submit
                         placeholder="0.00"
                     />
                     {errors.price && <p className={errorClass}>{errors.price.message}</p>}
+                </div>
+                <div>
+                    <label className={labelClass}>Quantity</label>
+                    <input
+                        type="number"
+                        step="1"
+                        {...register('quantity')}
+                        className={inputClass}
+                        placeholder="0"
+                    />
+                    {errors.quantity && <p className={errorClass}>{errors.quantity.message}</p>}
                 </div>
                 <div>
                     <label className={labelClass}>Grade</label>

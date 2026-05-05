@@ -81,11 +81,16 @@ export default function BookCard({ book, onEdit, onDelete, onUploadImage }) {
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 truncate">{book.author}</p>
                 <div className="flex items-center justify-between mt-3">
                     <span className="text-sm font-semibold text-slate-900 dark:text-slate-50">₹{book.price}</span>
-                    {book.grade && (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                            {book.grade}
+                    <div className="flex items-center gap-2">
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${book.quantity > 0 ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'}`}>
+                            {book.quantity > 0 ? `${book.quantity} in stock` : 'Out of stock'}
                         </span>
-                    )}
+                        {book.grade && (
+                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                {book.grade}
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

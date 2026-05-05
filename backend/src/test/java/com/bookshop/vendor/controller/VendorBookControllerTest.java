@@ -96,11 +96,11 @@ public class VendorBookControllerTest {
                 .build();
 
         bookRequest = new BookRequest(
-                "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book"
+                "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book", 20
         );
 
         bookResponse = new BookResponse(
-                100L, "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book", "/api/v1/vendor/books/100/picture", Instant.now()
+                100L, "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book", 20, "/api/v1/vendor/books/100/picture", Instant.now()
         );
     }
 
@@ -182,6 +182,25 @@ public class VendorBookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.IMAGE_JPEG))
                 .andExpect(content().bytes(mockBytes));
+    }
+
+    @Test
+    @DisplayName("Should return 400 Bad Request when creating book with negative quantity")
+    public void givenNegativeQuantity_whenCreateBook_thenReturnBadRequest() throws Exception {
+        BookRequest invalidRequest = new BookRequest(
+                "Title", "Author", "Subtitle", BigDecimal.TEN, "New", "Desc", -5
+        );
+
+        mockMvc.perform(post("/api/v1/vendor/books")
+                        .with(user(vendor))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+
+                .andExpect(jsonPath("$.error").value("Validation Failed"))
+
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Quantity cannot be negative")));
     }
 
     //Some security test

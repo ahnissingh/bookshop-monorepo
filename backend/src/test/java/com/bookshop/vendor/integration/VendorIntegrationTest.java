@@ -104,20 +104,21 @@ public class VendorIntegrationTest extends AbstractIntegrationTest {
     @DisplayName("Should successfully save a book and link it to the Vendor in the database")
     public void givenValidRequest_whenCreateBook_thenSaveToRealDatabase() throws Exception {
         BookRequest request = new BookRequest(
-                "Integration Testing Mastery", "Ahnis Singh", "Subtitle", BigDecimal.valueOf(19.99), "New", "Desc"
+                "Integration Testing Mastery", "Ahnis Singh", "Subtitle", BigDecimal.valueOf(19.99), "New", "Desc", 50
         );
 
         mockMvc.perform(post("/api/v1/vendor/books")
-                        .cookie(getAuthCookie(validVendor)) 
+                        .cookie(getAuthCookie(validVendor))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.title").value("Integration Testing Mastery"));
+                .andExpect(jsonPath("$.data.title").value("Integration Testing Mastery"))
+                .andExpect(jsonPath("$.data.quantity").value(50));
 
-        // VERIFY AGAINST THE REAL DATABASE
         List<Book> savedBooks = bookRepository.findAll();
         assertThat(savedBooks).hasSize(1);
         assertThat(savedBooks.get(0).getTitle()).isEqualTo("Integration Testing Mastery");
+        assertThat(savedBooks.get(0).getQuantity()).isEqualTo(50);
         assertThat(savedBooks.get(0).getUser().getId()).isEqualTo(validVendor.getId());
     }
 
@@ -125,9 +126,9 @@ public class VendorIntegrationTest extends AbstractIntegrationTest {
     @DisplayName("Should return only books belonging to the authenticated vendor")
     public void givenMultipleVendors_whenGetMyBooks_thenReturnOnlyOwnedBooks() throws Exception {
         // Save books for different vendors directly to DB
-        bookRepository.save(Book.builder().title("Vendor Book 1").author("A").price(BigDecimal.TEN).user(validVendor).build());
-        bookRepository.save(Book.builder().title("Vendor Book 2").author("B").price(BigDecimal.TEN).user(validVendor).build());
-        bookRepository.save(Book.builder().title("Hacker Book").author("C").price(BigDecimal.TEN).user(hackerVendor).build());
+        bookRepository.save(Book.builder().title("Vendor Book 1").author("A").quantity(10).price(BigDecimal.TEN).user(validVendor).build());
+        bookRepository.save(Book.builder().title("Vendor Book 2").author("B").quantity(10).price(BigDecimal.TEN).user(validVendor).build());
+        bookRepository.save(Book.builder().title("Hacker Book").author("C").quantity(10).price(BigDecimal.TEN).user(hackerVendor).build());
 
         mockMvc.perform(get("/api/v1/vendor/books")
                         .cookie(getAuthCookie(validVendor)))
@@ -141,7 +142,7 @@ public class VendorIntegrationTest extends AbstractIntegrationTest {
     public void givenHackerVendor_whenDeleteOtherVendorBook_thenThrowErrorAndDoNotDelete() throws Exception {
         // Give validVendor a book
         Book targetBook = bookRepository.save(
-                Book.builder().title("Precious Book").author("A").price(BigDecimal.TEN).user(validVendor).build()
+                Book.builder().title("Precious Book").author("A").quantity(10).price(BigDecimal.TEN).user(validVendor).build()
         );
 
         // Hacker tries to delete it

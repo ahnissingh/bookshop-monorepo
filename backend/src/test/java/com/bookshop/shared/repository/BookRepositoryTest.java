@@ -55,9 +55,15 @@ public class BookRepositoryTest extends AbstractBaseRepositoryTest {
     @DisplayName("Should find only books belonging to a specific user")
     void givenVendorWithBooks_whenFindByUser_thenReturnOnlyVendorsBooks() {
         // given - setup books for two different vendors
-        Book book1 = Book.builder().title("Book A").author("Author A").price(BigDecimal.TEN).user(vendor1).build();
-        Book book2 = Book.builder().title("Book B").author("Author B").price(BigDecimal.valueOf(20)).user(vendor1).build();
-        Book book3 = Book.builder().title("Book C").author("Author C").price(BigDecimal.valueOf(15)).user(vendor2).build();
+        Book book1 = Book.builder()
+                .title("Book A")
+                .author("Author A")
+                .quantity(10)
+                .price(BigDecimal.TEN)
+                .user(vendor1)
+                .build();
+        Book book2 = Book.builder().title("Book B").author("Author B").quantity(10).price(BigDecimal.valueOf(20)).user(vendor1).build();
+        Book book3 = Book.builder().title("Book C").author("Author C").quantity(10).price(BigDecimal.valueOf(15)).user(vendor2).build();
 
         bookRepository.save(book1);
         bookRepository.save(book2);
@@ -80,9 +86,9 @@ public class BookRepositoryTest extends AbstractBaseRepositoryTest {
     @DisplayName("Should correctly paginate books for a user")
     void givenMultipleBooks_whenFindByUserWithSmallPage_thenPaginateCorrectly() {
         // given - Save 3 books for vendor1
-        bookRepository.save(Book.builder().title("B1").author("Author").price(BigDecimal.TEN).user(vendor1).build());
-        bookRepository.save(Book.builder().title("B2").author("Author").price(BigDecimal.TEN).user(vendor1).build());
-        bookRepository.save(Book.builder().title("B3").author("Author").price(BigDecimal.TEN).user(vendor1).build());
+        bookRepository.save(Book.builder().title("B1").author("Author").quantity(10).price(BigDecimal.TEN).user(vendor1).build());
+        bookRepository.save(Book.builder().title("B2").author("Author").quantity(10).price(BigDecimal.TEN).user(vendor1).build());
+        bookRepository.save(Book.builder().title("B3").author("Author").quantity(10).price(BigDecimal.TEN).user(vendor1).build());
 
         // when - Request Page 0, but only 2 items per page
         Page<Book> result = bookRepository.findByUser(vendor1, PageRequest.of(0, 2));
@@ -110,7 +116,7 @@ public class BookRepositoryTest extends AbstractBaseRepositoryTest {
     @DisplayName("Should find Book by ID and User when ownership matches")
     void givenBookIdAndOwner_whenFindByIdAndUser_thenReturnBook() {
         // given
-        Book targetBook = Book.builder().title("Target Book").author("Author").price(BigDecimal.TEN).user(vendor1).build();
+        Book targetBook = Book.builder().title("Target Book").author("Author").quantity(10).price(BigDecimal.TEN).user(vendor1).build();
         Book savedBook = bookRepository.save(targetBook);
 
         // when
@@ -125,7 +131,7 @@ public class BookRepositoryTest extends AbstractBaseRepositoryTest {
     @DisplayName("Should return empty when a User tries to find a Book they do not own")
     void givenBookIdAndWrongOwner_whenFindByIdAndUser_thenReturnEmpty() {
         // given - Book belongs to vendor1
-        Book targetBook = Book.builder().title("Secret Book").author("Author").price(BigDecimal.TEN).user(vendor1).build();
+        Book targetBook = Book.builder().title("Secret Book").author("Author").quantity(10).price(BigDecimal.TEN).user(vendor1).build();
         Book savedBook = bookRepository.save(targetBook);
 
         // when - vendor2 tries to access it

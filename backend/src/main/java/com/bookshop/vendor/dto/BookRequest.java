@@ -1,5 +1,6 @@
 package com.bookshop.vendor.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -20,5 +21,9 @@ public record BookRequest(
 
         String grade,
 
-        String description
+        String description,
+        
+        @NotNull(message = "Quantity is required")
+        @Min(value = 0, message = "Quantity cannot be negative")
+        Integer quantity
 ) {}

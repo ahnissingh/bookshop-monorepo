@@ -28,7 +28,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -68,16 +67,17 @@ public class VendorBookServiceTest {
                 .title("Spring Boot Mastery")
                 .author("Ahnis Singh")
                 .price(BigDecimal.valueOf(29.99))
+                .quantity(10)
                 .user(vendor)
                 .picture(new byte[]{1, 2, 3, 4})
                 .build();
 
         bookRequest = new BookRequest(
-                "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book"
+                "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book", 10
         );
 
         bookResponse = new BookResponse(
-                100L, "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book", mockPictureUrl, Instant.now()
+                100L, "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book", 10, mockPictureUrl, Instant.now()
         );
     }
 

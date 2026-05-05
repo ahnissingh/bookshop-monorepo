@@ -45,6 +45,8 @@ public class Book {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "quantity", nullable = false)
+    private Integer quantity = 1;
 
     // optional = false enforces that a Book MUST have a User at the JPA level
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

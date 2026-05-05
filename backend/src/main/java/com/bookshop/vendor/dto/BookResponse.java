@@ -12,6 +12,7 @@ public record BookResponse(
         BigDecimal price,
         String grade,
         String description,
+        Integer quantity,
         String pictureUrl,
         Instant createdAt
 ) {}

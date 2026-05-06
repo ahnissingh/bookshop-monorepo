@@ -1,13 +1,13 @@
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../api/axiosClient.js';
 import { setCredentials } from '../store/authSlice.js';
 import { addToast } from '../store/toastSlice';
 
 export default function Register() {
-    const { register, handleSubmit, getValues, watch, formState: { errors, isSubmitting } } = useForm({
+    const { register, handleSubmit, getValues, watch, clearErrors, formState: { errors, isSubmitting } } = useForm({
         defaultValues: { role: 'CLIENT' },
     });
     const dispatch = useDispatch();
@@ -16,6 +16,22 @@ export default function Register() {
     const [showConfirm, setShowConfirm] = useState(false);
 
     const selectedRole = watch('role');
+    const passwordValue = watch('password');
+    const confirmValue = watch('confirmPassword');
+    const passwordsMismatchLive =
+        String(passwordValue ?? '').length > 0 &&
+        String(confirmValue ?? '').length > 0 &&
+        passwordValue !== confirmValue;
+
+    useEffect(() => {
+        if (
+            String(passwordValue ?? '').length > 0 &&
+            String(confirmValue ?? '').length > 0 &&
+            passwordValue === confirmValue
+        ) {
+            clearErrors('confirmPassword');
+        }
+    }, [passwordValue, confirmValue, clearErrors]);
 
     const onSubmit = async (data) => {
         try {
@@ -148,7 +164,12 @@ export default function Register() {
                                     type={showConfirm ? 'text' : 'password'}
                                     {...register("confirmPassword", {
                                         required: "Please confirm your password",
-                                        validate: (v) => v === getValues("password") || "Passwords do not match",
+                                        deps: ['password'],
+                                        validate: (v) => {
+                                            const pwd = getValues('password');
+                                            if (!v?.length) return true;
+                                            return v === pwd || 'Passwords do not match';
+                                        },
                                     })}
                                     className={passwordInputClass}
                                     placeholder="••••••••"
@@ -162,7 +183,12 @@ export default function Register() {
                                     {showConfirm ? eyeOff : eyeOpen}
                                 </button>
                             </div>
-                            {errors.confirmPassword && <p className="text-xs text-red-500 dark:text-red-400 mt-1">{errors.confirmPassword.message}</p>}
+                            {passwordsMismatchLive && (
+                                <p className="text-xs text-red-500 dark:text-red-400 mt-1">Passwords do not match</p>
+                            )}
+                            {errors.confirmPassword && !passwordsMismatchLive && (
+                                <p className="text-xs text-red-500 dark:text-red-400 mt-1">{errors.confirmPassword.message}</p>
+                            )}
                         </div>
                         <button
                             type="submit"

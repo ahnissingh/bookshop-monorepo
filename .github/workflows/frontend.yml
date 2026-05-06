@@ -21,7 +21,7 @@ jobs:
         working-directory: ./frontend
         env:
 
-          VITE_API_BASE_URL: http://api.bookstacks.store/api/v1
+          VITE_API_BASE_URL: https://api.bookstacks.store/api/v1
         run: |
           npm install
           npm run build

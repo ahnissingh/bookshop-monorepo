@@ -20,7 +20,7 @@ jobs:
       - name: Build React App
         working-directory: ./frontend
         env:
-          # Using your existing secret and dropping the 8080 port for the proxy!
+
           VITE_API_BASE_URL: http://api.bookstacks.store/api/v1
         run: |
           npm install

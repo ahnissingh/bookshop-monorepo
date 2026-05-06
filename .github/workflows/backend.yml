@@ -85,6 +85,6 @@ jobs:
                     -e SPRING_DATASOURCE_USERNAME="${{ secrets.DB_USERNAME }}" \
                     -e SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
                     -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
-                    -e CORS_ALLOWED_ORIGINS="http://bookstacks.store" \
+                    -e CORS_ALLOWED_ORIGINS="https://bookstacks.store" \
                     --restart unless-stopped \
                     907260787573.dkr.ecr.ap-south-1.amazonaws.com/ahnis/mybookshop:latest

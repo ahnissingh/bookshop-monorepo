@@ -2,7 +2,7 @@ spring:
   #This is a fallback for amazon ses as it ses is yet for approval but works in sandbox that is allows only allowed emails to receive emails
   mail:
     host: smtp.sendgrid.net
-    port: 2525
+    port: 587
     username: apikey
     password: ${SENDGRID_API_PASSWORD}
     properties:

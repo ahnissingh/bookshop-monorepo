@@ -209,8 +209,8 @@ public class AuthServiceImpl implements AuthService {
                 .enabled(false)
                 .build();
 
+        //todo migrate to outbox pattern if time
         userRepository.save(user);
-
         generateTokenAndPublishEvent(user, TokenType.VERIFICATION);
 
         log.info("Successfully saved new user: {} with role: {}", user.getUsername(), roleName);

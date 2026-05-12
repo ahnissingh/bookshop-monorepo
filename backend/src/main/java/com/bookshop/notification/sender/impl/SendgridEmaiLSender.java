@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @ConditionalOnProperty(name = "app.email.provider", havingValue = "sendgrid")
 public class SendgridEmaiLSender implements EmailSender {
+
     private final JavaMailSender mailSender;
 
     @Override

@@ -1,11 +1,12 @@
 package com.bookshop;
 
+import io.awspring.cloud.autoconfigure.ses.SesAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = SesAutoConfiguration.class)
 @EnableAsync
 @EnableScheduling
 public class BackendApplication {

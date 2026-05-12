@@ -86,5 +86,10 @@ jobs:
                     -e SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
                     -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
                     -e CORS_ALLOWED_ORIGINS="https://bookstacks.store" \
+                    -e SENDGRID_API_KEY="${{ secrets.SENDGRID_API_KEY }}" \
+                    -e SENDGRID_API_PASSWORD="${{ secrets.SENDGRID_API_PASSWORD }}" \
+                    -e AWS_ACCESS_KEY="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+                    -e AWS_SECRET_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+                    -e SQS_NOTIFICATION_QUEUE_URL="${{ secrets.SQS_NOTIFICATION_QUEUE_URL }}" \
                     --restart unless-stopped \
                     907260787573.dkr.ecr.ap-south-1.amazonaws.com/ahnis/mybookshop:latest

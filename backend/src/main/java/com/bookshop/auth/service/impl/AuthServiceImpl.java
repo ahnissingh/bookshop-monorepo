@@ -37,15 +37,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class AuthServiceImpl implements AuthService {
+    private static final String ROLE_VENDOR = "ROLE_VENDOR";
+    private static final String ROLE_CLIENT = "ROLE_CLIENT";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
-    private static final String ROLE_VENDOR = "ROLE_VENDOR";
-    private static final String ROLE_CLIENT = "ROLE_CLIENT";
-
     private final SecureTokenRepository secureTokenRepository;
     private final EventPublisher eventPublisher;
 

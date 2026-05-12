@@ -30,6 +30,10 @@ const AUTH_ENDPOINTS = [
     '/auth/refresh',
     '/auth/register/vendor',
     '/auth/register/client',
+    '/auth/verify',
+    '/auth/resend-verification',
+    '/auth/forgot-password',
+    '/auth/reset-password',
 ];
 
 const isAuthEndpoint = (url) =>

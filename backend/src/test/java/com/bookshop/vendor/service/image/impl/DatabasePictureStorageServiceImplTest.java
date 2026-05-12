@@ -1,8 +1,7 @@
-package com.bookshop.vendor.service.image;
+package com.bookshop.vendor.service.image.impl;
 
 import com.bookshop.shared.entity.Book;
 import com.bookshop.shared.repository.BookRepository;
-import com.bookshop.vendor.service.image.impl.DatabasePictureStorageServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -7,10 +7,12 @@ import com.bookshop.auth.repository.RoleRepository;
 import com.bookshop.auth.repository.UserRepository;
 import com.bookshop.auth.security.JwtUtil;
 import com.bookshop.auth.service.impl.AuthServiceImpl;
+import com.bookshop.notification.event.publisher.EventPublisher;
 import com.bookshop.shared.entity.Role;
 import com.bookshop.shared.entity.User;
 import com.bookshop.shared.exception.InvalidTokenException;
 import com.bookshop.shared.exception.UserAlreadyExistsException;
+import com.bookshop.shared.repository.SecureTokenRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -48,7 +51,10 @@ public class AuthServiceImplTest {
 
     @Mock
     private AuthenticationManager authenticationManager;
-
+    @Mock
+    private SecureTokenRepository secureTokenRepository;
+    @Mock
+    private EventPublisher eventPublisher;
     @InjectMocks
     private AuthServiceImpl authService;
 
@@ -77,37 +83,37 @@ public class AuthServiceImplTest {
         loginRequest = new LoginRequest("vendor123", "rawPassword");
     }
 
+
+    // FIX APPLIED need to review
     @DisplayName("JUnit test for registerVendor method")
     @Test
-    public void givenValidRequest_whenRegisterVendor_thenReturnAuthResponse() {
-        given(userRepository.existsByUsernameOrEmail(registrationRequest.username(), registrationRequest.email()))
-                .willReturn(false);
+    public void givenValidRequest_whenRegisterVendor_thenSavesUserAndPublishesEvent() {
+        // Given: Mocking the exact DB calls made in processRegistration
+        given(userRepository.findEnabledStatusByEmail(registrationRequest.email()))
+                .willReturn(Optional.empty()); // User does not exist
+        given(userRepository.existsByUsername(registrationRequest.username()))
+                .willReturn(false); // Username is unique
         given(roleRepository.findByName("ROLE_VENDOR"))
                 .willReturn(Optional.of(vendorRole));
-        given(passwordEncoder.encode(registrationRequest.password()))
-                .willReturn("encodedPassword");
         given(userRepository.save(any(User.class)))
                 .willReturn(user);
-        given(jwtUtil.generateAccessToken(any(User.class)))
-                .willReturn("mockAccessToken");
-        given(jwtUtil.generateRefreshToken(any(User.class)))
-                .willReturn("mockRefreshToken");
 
-        AuthResponse response = authService.registerVendor(registrationRequest);
 
-        assertThat(response).isNotNull();
-        assertThat(response.accessToken()).isEqualTo("mockAccessToken");
-        assertThat(response.username()).isEqualTo("vendor123");
-        assertThat(response.roles()).contains("ROLE_VENDOR");
+        // When
+        authService.registerVendor(registrationRequest);
 
+        // Then
         verify(userRepository).save(any(User.class));
+        // Verify that the email verification token was created and SQS event was published
+        verify(secureTokenRepository).save(any());
+        verify(eventPublisher).publish(any(String.class), any());
     }
 
-    @DisplayName("JUnit test for registerVendor method which throws exception")
+    @DisplayName("JUnit test for registerVendor method which throws exception on existing email")
     @Test
     public void givenExistingUser_whenRegisterVendor_thenThrowsException() {
-        given(userRepository.existsByUsernameOrEmail(registrationRequest.username(), registrationRequest.email()))
-                .willReturn(true);
+        given(userRepository.findEnabledStatusByEmail(registrationRequest.email()))
+                .willReturn(Optional.of(true));
 
         assertThrows(UserAlreadyExistsException.class, () -> authService.registerVendor(registrationRequest));
 
@@ -117,7 +123,7 @@ public class AuthServiceImplTest {
     @DisplayName("JUnit test for login method")
     @Test
     public void givenLoginRequest_whenLogin_thenReturnAuthResponse() {
-       
+
         given(userRepository.findByUsernameOrEmail(loginRequest.usernameOrEmail()))
                 .willReturn(Optional.of(user));
         given(jwtUtil.generateAccessToken(user))

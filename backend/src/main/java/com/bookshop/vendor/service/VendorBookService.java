@@ -1,6 +1,5 @@
 package com.bookshop.vendor.service;
 
-import com.bookshop.auth.repository.UserRepository;
 import com.bookshop.shared.entity.Book;
 import com.bookshop.shared.entity.User;
 import com.bookshop.shared.exception.ResourceNotFoundException;
@@ -26,7 +25,7 @@ public class VendorBookService {
 
     public VendorBookService(BookRepository bookRepository,
                              BookMapper bookMapper,
-                             @Qualifier("databasePictureService") PictureStorageService pictureStorageService, UserRepository userRepository) {
+                             @Qualifier("s3PictureService") PictureStorageService pictureStorageService) {
         this.bookRepository = bookRepository;
         this.bookMapper = bookMapper;
         this.pictureStorageService = pictureStorageService;

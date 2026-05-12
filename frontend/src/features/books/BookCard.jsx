@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function BookCard({ book, onEdit, onDelete, onUploadImage }) {
     const [imgError, setImgError] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
 
-    const imageUrl = book.pictureUrl
-        ? `${import.meta.env.VITE_API_BASE_URL}/vendor/books/${book.id}/picture`
-        : null;
+    const imageUrl = book.pictureUrl || null;
+
+    useEffect(() => {
+        setImgError(false);
+    }, [book.id, book.pictureUrl]);
 
     return (
         <div className="group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-200 hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700">
@@ -15,7 +17,7 @@ export default function BookCard({ book, onEdit, onDelete, onUploadImage }) {
                     <img
                         src={imageUrl}
                         alt={book.title}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="w-full h-full object-contain object-center transition-opacity duration-300 group-hover:opacity-95"
                         onError={() => setImgError(true)}
                     />
                 ) : (

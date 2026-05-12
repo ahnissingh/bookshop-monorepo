@@ -1,4 +1,22 @@
 spring:
+  cloud:
+    aws:
+      credentials:
+        secret-key: ${AWS_SECRET_KEY}
+        access-key: ${AWS_ACCESS_KEY}
+      region:
+        static: ${AWS_REGION:ap-south-1}
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 2525
+    username: 8ef771af33ae62
+    password: ${MAILTRAP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   datasource:
     url: jdbc:mysql://localhost:3306/bookshop_db?allowPublicKeyRetrieval=true&useSSL=false
     username: root
@@ -34,6 +52,17 @@ cors:
   allowed-headers:
     - "*"
 app:
+  email:
+    provider: "sendgrid"
+  aws:
+    s3:
+      bucket-name: "bookstacks-images"
+    sqs:
+      notification-queue-url: ${SQS_NOTIFICATION_QUEUE_URL}
+    ses:
+      from-email: "noreply@bookstacks.store"
+  frontend:
+    url: http://localhost:5173
   cookie:
     secure: false
     domain: "localhost"

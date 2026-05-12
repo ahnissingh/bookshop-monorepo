@@ -7,8 +7,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.Instant;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Entity
 @Table(name = "users")
@@ -51,7 +56,21 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Book> books = new ArrayList<>();
 
+    @Column(name = "is_account_non_expired", nullable = false)
+    @Builder.Default
+    private boolean accountNonExpired = true;
 
+    @Column(name = "is_account_non_locked", nullable = false)
+    @Builder.Default
+    private boolean accountNonLocked = true;
+
+    @Column(name = "is_credentials_non_expired", nullable = false)
+    @Builder.Default
+    private boolean credentialsNonExpired = true;
+    // MUST be false by default for email verification
+    @Column(name = "is_enabled", nullable = false)
+    @Builder.Default
+    private boolean enabled = false;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
@@ -64,7 +83,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority( role.getName()))
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .toList();
     }
 
@@ -78,23 +97,24 @@ public class User implements UserDetails {
         return this.username;
     }
 
+
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return this.accountNonExpired;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return this.accountNonLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return this.credentialsNonExpired;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.enabled;
     }
 }

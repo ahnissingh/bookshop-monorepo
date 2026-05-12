@@ -3,8 +3,8 @@ import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import api from '../api/axiosClient.js';
-import { setCredentials } from '../store/authSlice.js';
 import { addToast } from '../store/toastSlice';
+import { getApiErrorMessage, isUnverifiedAccountError } from '../utils/apiError.js';
 
 export default function Register() {
     const { register, handleSubmit, getValues, watch, clearErrors, formState: { errors, isSubmitting } } = useForm({
@@ -14,8 +14,12 @@ export default function Register() {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [showUnverifiedHelp, setShowUnverifiedHelp] = useState(false);
+    const [registerErrorDetail, setRegisterErrorDetail] = useState('');
+    const [resendPending, setResendPending] = useState(false);
 
     const selectedRole = watch('role');
+    const emailValue = watch('email');
     const passwordValue = watch('password');
     const confirmValue = watch('confirmPassword');
     const passwordsMismatchLive =
@@ -34,16 +38,50 @@ export default function Register() {
     }, [passwordValue, confirmValue, clearErrors]);
 
     const onSubmit = async (data) => {
+        setShowUnverifiedHelp(false);
+        setRegisterErrorDetail('');
         try {
             const { role, confirmPassword, ...payload } = data;
             const endpoint = role === 'VENDOR' ? '/auth/register/vendor' : '/auth/register/client';
-            const response = await api.post(endpoint, payload);
-            dispatch(setCredentials(response.data.data));
-            localStorage.setItem('isLoggedIn', 'true');
-            dispatch(addToast('Account created successfully!', 'success'));
-            navigate(role === 'VENDOR' ? '/dashboard' : '/');
+            await api.post(endpoint, payload);
+            dispatch(addToast(
+                'Account created. Please check your inbox for a verification link.',
+                'success'
+            ));
+            navigate('/login');
         } catch (error) {
-            dispatch(addToast(error.response?.data?.message || 'Registration failed', 'error'));
+            if (isUnverifiedAccountError(error)) {
+                const msg = getApiErrorMessage(
+                    error,
+                    'An account with this email exists but is not verified yet.'
+                );
+                setRegisterErrorDetail(msg);
+                setShowUnverifiedHelp(true);
+                dispatch(addToast(msg, 'error'));
+                return;
+            }
+            dispatch(addToast(getApiErrorMessage(error, 'Registration failed'), 'error'));
+        }
+    };
+
+    const handleResendVerification = async () => {
+        const email = getValues('email');
+        if (!email?.trim()) {
+            dispatch(addToast('Enter the email address you used to register.', 'error'));
+            return;
+        }
+        setResendPending(true);
+        try {
+            await api.post('/auth/resend-verification', null, { params: { email: email.trim() } });
+            dispatch(addToast('Verification email sent. Please check your inbox.', 'success'));
+        } catch (err) {
+            if (err.response?.status === 429) {
+                dispatch(addToast('Please wait about 2 minutes before requesting another verification email.', 'error'));
+            } else {
+                dispatch(addToast(getApiErrorMessage(err, 'Could not resend verification email.'), 'error'));
+            }
+        } finally {
+            setResendPending(false);
         }
     };
 
@@ -190,6 +228,57 @@ export default function Register() {
                                 <p className="text-xs text-red-500 dark:text-red-400 mt-1">{errors.confirmPassword.message}</p>
                             )}
                         </div>
+                        {showUnverifiedHelp && (
+                            <div
+                                className="rounded-xl border border-indigo-200/90 bg-gradient-to-br from-indigo-50 via-white to-slate-50 p-4 shadow-sm ring-1 ring-indigo-500/10 dark:border-indigo-500/35 dark:from-indigo-950/50 dark:via-slate-900 dark:to-slate-950 dark:ring-indigo-400/15 sm:p-5"
+                                role="region"
+                                aria-labelledby="unverified-heading"
+                            >
+                                <div className="flex gap-4">
+                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 shadow-inner dark:bg-indigo-900/60 dark:text-indigo-200">
+                                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                                        </svg>
+                                    </div>
+                                    <div className="min-w-0 flex-1 space-y-3">
+                                        <div>
+                                            <h3 id="unverified-heading" className="text-sm font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+                                                Verify your email to continue
+                                            </h3>
+                                            <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                                                {registerErrorDetail}
+                                            </p>
+                                            {emailValue?.trim() ? (
+                                                <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
+                                                    We&apos;ll send a new link to{' '}
+                                                    <span className="font-medium text-slate-700 dark:text-slate-300">{emailValue.trim()}</span>
+                                                </p>
+                                            ) : null}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleResendVerification}
+                                            disabled={resendPending}
+                                            className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                                        >
+                                            {resendPending ? (
+                                                <>
+                                                    <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden />
+                                                    Sending…
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg className="h-4 w-4 shrink-0 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                                                    </svg>
+                                                    Resend verification email
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         <button
                             type="submit"
                             disabled={isSubmitting}

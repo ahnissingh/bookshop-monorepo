@@ -25,7 +25,7 @@ public class DatabasePictureStorageServiceImpl implements PictureStorageService 
             throw new FileProcessingException("Failed to process image file", e);
         }
     }
-
+    //todo migrate return url to client agnostic endpoint
     @Override
     public String getPictureUrl(Book book) {
         // If the book has no picture, return null so UI shows a placeholder

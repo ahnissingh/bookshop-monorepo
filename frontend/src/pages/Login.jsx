@@ -5,6 +5,7 @@ import { useState } from 'react';
 import api from '../api/axiosClient.js';
 import { setCredentials } from '../store/authSlice';
 import { addToast } from '../store/toastSlice';
+import { getApiErrorMessage } from '../utils/apiError.js';
 
 export default function Login() {
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
@@ -25,7 +26,7 @@ export default function Login() {
                 navigate('/');
             }
         } catch (error) {
-            dispatch(addToast(error.response?.data?.message || 'Login failed', 'error'));
+            dispatch(addToast(getApiErrorMessage(error, 'Login failed'), 'error'));
         }
     };
 
@@ -75,6 +76,14 @@ export default function Login() {
                                 </button>
                             </div>
                             {errors.password && <p className="text-xs text-red-500 dark:text-red-400 mt-1">{errors.password.message}</p>}
+                        </div>
+                        <div className="text-right">
+                            <Link
+                                to="/forgot-password"
+                                className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:underline"
+                            >
+                                Forgot password?
+                            </Link>
                         </div>
                         <button
                             type="submit"

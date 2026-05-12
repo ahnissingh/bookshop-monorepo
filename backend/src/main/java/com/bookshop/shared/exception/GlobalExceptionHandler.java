@@ -1,6 +1,7 @@
 package com.bookshop.shared.exception;
 
 
+import com.bookshop.shared.dto.ApiResponse;
 import com.bookshop.shared.dto.ErrorDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -181,6 +182,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(UnverifiedUserException.class)
+    public ResponseEntity<ErrorDetails> handleUnverifiedAccount(UnverifiedUserException ex, HttpServletRequest request) {
+
+        ErrorDetails errorDetails = new ErrorDetails(
+                Instant.now(),
+                HttpStatus.CONFLICT.value(),
+                "UNVERIFIED_ACCOUNT",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+    }
 
     /**
      * Global Fallback: Catches any other  exceptions to prevent messy stack traces.

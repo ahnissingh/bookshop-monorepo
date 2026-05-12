@@ -79,30 +79,31 @@ public class AuthControllerTest {
         );
     }
 
+    // UPDATED ONES NEED TO REVIEW
     @Test
     public void givenValidRequest_whenRegisterVendor_thenReturnSuccess() throws Exception {
-        given(authService.registerVendor(any(UserRegistrationRequest.class))).willReturn(authResponse);
-        willDoNothing().given(cookieUtil).attachAuthCookies(any(HttpServletResponse.class), any(AuthResponse.class));
+        // Now it returns void, so we use willDoNothing()
+        willDoNothing().given(authService).registerVendor(any(UserRegistrationRequest.class));
 
         mockMvc.perform(post("/api/v1/auth/register/vendor")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registrationRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Vendor registered successfully"))
-                .andExpect(jsonPath("$.data.username").value("ahnisaneja@gmail.com"));
+                .andExpect(status().isCreated()) // Changed to 201 CREATED
+                .andExpect(jsonPath("$.message").value("Vendor registered successfully. Please check your email for the verification link."))
+                .andExpect(jsonPath("$.data").isEmpty()); // Data should be null
     }
 
+    // UPDATED ONES NEED TO REVIEW
     @Test
     public void givenValidRequest_whenRegisterClient_thenReturnSuccess() throws Exception {
-        given(authService.registerClient(any(UserRegistrationRequest.class))).willReturn(authResponse);
-        willDoNothing().given(cookieUtil).attachAuthCookies(any(HttpServletResponse.class), any(AuthResponse.class));
+        willDoNothing().given(authService).registerClient(any(UserRegistrationRequest.class));
 
         mockMvc.perform(post("/api/v1/auth/register/client")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registrationRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Client registered successfully"))
-                .andExpect(jsonPath("$.data.username").value("ahnisaneja@gmail.com"));
+                .andExpect(status().isCreated()) // Changed to 201 CREATED
+                .andExpect(jsonPath("$.message").value("Client registered successfully. Please check your email for the verification link."))
+                .andExpect(jsonPath("$.data").isEmpty()); // Data should be null
     }
 
     @Test

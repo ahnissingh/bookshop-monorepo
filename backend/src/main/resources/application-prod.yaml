@@ -1,4 +1,16 @@
 spring:
+  #This is a fallback for amazon ses as it ses is yet for approval but works in sandbox that is allows only allowed emails to receive emails
+  mail:
+    host: smtp.sendgrid.net
+    port: 2525
+    username: ${SENDGRID_API_KEY}
+    password: ${SENDGRID_API_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -20,6 +32,13 @@ spring:
     properties:
       hibernate:
         format_sql: false
+  cloud:
+    aws:
+      credentials:
+        secret-key: ${AWS_SECRET_KEY}
+        access-key: ${AWS_ACCESS_KEY}
+      region:
+        static: ${AWS_REGION:ap-south-1}
 logging:
   level:
     root: INFO
@@ -37,7 +56,19 @@ cors:
     - "OPTIONS"
   allowed-headers:
     - "*"
+
 app:
+  email:
+    provider: "sendgrid"  #'ses' for aws ses and 'sendgrid' for sendgrid
+  frontend:
+    url: https://bookstacks.store
+  aws:
+    s3:
+      bucket-name: "bookstacks-images"
+    sqs:
+      notification-queue-url: ${SQS_NOTIFICATION_QUEUE_URL}
+    ses:
+      from-email: "noreply@bookstacks.store"
   cookie:
     secure: true
     domain: ".bookstacks.store"

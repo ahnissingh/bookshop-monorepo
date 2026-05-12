@@ -27,7 +27,7 @@ public class SendgridEmaiLSender implements EmailSender {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
-            helper.setFrom("noreply@bookstacks.store");
+            helper.setFrom("ahnisaneja@gmail.com");
             helper.setTo(to);
             helper.setSubject(subject);
 

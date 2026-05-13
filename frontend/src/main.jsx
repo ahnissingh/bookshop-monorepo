@@ -19,9 +19,12 @@ import ResetPassword from './pages/ResetPassword.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import PersistLogin from './components/PersistLogin.jsx';
 import DashboardLayout from './layouts/DashboardLayout.jsx';
+import ClientLayout from './layouts/ClientLayout.jsx';
 import BooksPage from './pages/vendor/BooksPage.jsx';
 import AddBookPage from './pages/vendor/AddBookPage.jsx';
 import EditBookPage from './pages/vendor/EditBookPage.jsx';
+import ClientBooksPage from './pages/client/ClientBooksPage.jsx';
+import ClientBookDetailPage from './pages/client/ClientBookDetailPage.jsx';
 
 const router = createBrowserRouter([
     {
@@ -49,6 +52,19 @@ const router = createBrowserRouter([
                             { index: true, element: <BooksPage /> },
                             { path: "add", element: <AddBookPage /> },
                             { path: "edit/:id", element: <EditBookPage /> },
+                        ],
+                    },
+                ],
+            },
+            {
+                element: <ProtectedRoute allowedRoles={['ROLE_CLIENT']} />,
+                children: [
+                    {
+                        path: '/browse',
+                        element: <ClientLayout />,
+                        children: [
+                            { index: true, element: <ClientBooksPage /> },
+                            { path: ':id', element: <ClientBookDetailPage /> },
                         ],
                     },
                 ],

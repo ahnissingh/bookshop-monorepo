@@ -35,13 +35,13 @@ public class VendorBookService {
     @Transactional(readOnly = true)
     public Page<BookResponse> getMyBooks(User vendor, Pageable pageable) {
         return bookRepository.findByUser(vendor, pageable)
-                .map(book -> bookMapper.toResponse(book, pictureStorageService.getPictureUrl(book)));
+                .map(bookMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
     public BookResponse getBookById(User vendor, Long bookId) {
         Book book = getVerifiedBook(vendor, bookId);
-        return bookMapper.toResponse(book, pictureStorageService.getPictureUrl(book));
+        return bookMapper.toResponse(book);
     }
 
     @Transactional
@@ -50,7 +50,7 @@ public class VendorBookService {
         book.setUser(vendor); // Enforce ownership at creation
 
         Book savedBook = bookRepository.save(book);
-        return bookMapper.toResponse(savedBook, pictureStorageService.getPictureUrl(savedBook));
+        return bookMapper.toResponse(savedBook);
     }
 
     @Transactional
@@ -60,7 +60,7 @@ public class VendorBookService {
         bookMapper.updateEntityFromRequest(request, book);
         Book updatedBook = bookRepository.save(book);
 
-        return bookMapper.toResponse(updatedBook, pictureStorageService.getPictureUrl(updatedBook));
+        return bookMapper.toResponse(updatedBook);
     }
 
     @Transactional
@@ -76,18 +76,13 @@ public class VendorBookService {
 
         // Let the strategy (DB or S3) handle the actual saving
         pictureStorageService.uploadPicture(book, file);
+        String publicUrl = pictureStorageService.getPictureUrl(book);
+        //Now I attach the pictureUrl as a string in the book table
+        book.setPictureUrl(publicUrl);
+        bookRepository.save(book);
     }
 
-    /**
-     * This method is needed strictly for the Controller Endpoint
-     * to stream the raw bytes to the browser.
-     * When we move to S3, this method can simply be deleted cause response objects have pictureUrl
-     */
-    @Transactional(readOnly = true)
-    public byte[] getRawBookPicture(User vendor, Long bookId) {
-        Book book = getVerifiedBook(vendor, bookId);
-        return book.getPicture();
-    }
+
 
 
     private Book getVerifiedBook(User vendor, Long bookId) {

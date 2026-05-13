@@ -13,7 +13,9 @@ export default function Layout() {
     const handleLogout = async () => {
         try {
             await api.post('/auth/logout');
-        } catch (_) {}
+        } catch {
+            /* ignore logout network errors */
+        }
         dispatch(logout());
         localStorage.removeItem('isLoggedIn');
         navigate('/login');
@@ -35,6 +37,11 @@ export default function Layout() {
                         {isAuthenticated && roles.includes('ROLE_VENDOR') && (
                             <Link to="/dashboard" className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 transition-colors">
                                 Dashboard
+                            </Link>
+                        )}
+                        {isAuthenticated && roles.includes('ROLE_CLIENT') && (
+                            <Link to="/browse" className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 transition-colors">
+                                Browse
                             </Link>
                         )}
                     </div>

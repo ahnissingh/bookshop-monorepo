@@ -17,9 +17,11 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface BookMapper {
 
     Book toEntity(BookRequest request);
-
+    //todo delete this done
     @Mapping(target = "pictureUrl", source = "pictureUrl")
     BookResponse toResponse(Book book, String pictureUrl);
+
+    BookResponse toResponse(Book book);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(BookRequest request, @MappingTarget Book book);
@@ -28,6 +30,9 @@ public interface BookMapper {
     @Mapping(target = "vendor", source = "book.user")
     @Mapping(target = "pictureUrl", source = "pictureUrl")
     ClientBookResponse toClientResponse(Book book, String pictureUrl);
+
+    @Mapping(target = "vendor", source = "book.user")
+    ClientBookResponse toClientResponse(Book book);
 
     VendorSummary toVendorSummary(User user);
 }

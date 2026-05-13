@@ -22,6 +22,8 @@ export default function Login() {
             dispatch(addToast(`Welcome back, ${userData.username}!`, 'success'));
             if (userData.roles.includes('ROLE_VENDOR')) {
                 navigate('/dashboard');
+            } else if (userData.roles.includes('ROLE_CLIENT')) {
+                navigate('/browse');
             } else {
                 navigate('/');
             }

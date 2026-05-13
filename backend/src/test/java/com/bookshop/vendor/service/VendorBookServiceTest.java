@@ -6,7 +6,6 @@ import com.bookshop.shared.repository.BookRepository;
 import com.bookshop.vendor.dto.BookRequest;
 import com.bookshop.vendor.dto.BookResponse;
 import com.bookshop.shared.mapper.BookMapper;
-import com.bookshop.vendor.service.image.PictureStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -29,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -42,9 +39,6 @@ public class VendorBookServiceTest {
     @Mock
     private BookMapper bookMapper;
 
-    @Mock
-    private PictureStorageService pictureStorageService;
-
     @InjectMocks
     private VendorBookService vendorBookService;
 
@@ -52,7 +46,6 @@ public class VendorBookServiceTest {
     private Book book;
     private BookRequest bookRequest;
     private BookResponse bookResponse;
-    private final String mockPictureUrl = "/api/v1/vendor/books/1/picture";
 
     @BeforeEach
     public void setup() {
@@ -69,7 +62,6 @@ public class VendorBookServiceTest {
                 .price(BigDecimal.valueOf(29.99))
                 .quantity(10)
                 .user(vendor)
-                .picture(new byte[]{1, 2, 3, 4})
                 .build();
 
         bookRequest = new BookRequest(
@@ -77,7 +69,7 @@ public class VendorBookServiceTest {
         );
 
         bookResponse = new BookResponse(
-                100L, "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book", 10, mockPictureUrl, Instant.now()
+                100L, "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book", 10, "dummyUrl", Instant.now()
         );
     }
 
@@ -88,8 +80,7 @@ public class VendorBookServiceTest {
         Page<Book> bookPage = new PageImpl<>(List.of(book));
 
         given(bookRepository.findByUser(vendor, pageable)).willReturn(bookPage);
-        given(pictureStorageService.getPictureUrl(book)).willReturn(mockPictureUrl);
-        given(bookMapper.toResponse(book, mockPictureUrl)).willReturn(bookResponse);
+        given(bookMapper.toResponse(book)).willReturn(bookResponse);
 
         Page<BookResponse> responsePage = vendorBookService.getMyBooks(vendor, pageable);
 
@@ -102,14 +93,12 @@ public class VendorBookServiceTest {
     @Test
     public void givenValidBookIdAndOwner_whenGetBookById_thenReturnBookResponse() {
         given(bookRepository.findByIdAndUser(100L, vendor)).willReturn(Optional.of(book));
-        given(pictureStorageService.getPictureUrl(book)).willReturn(mockPictureUrl);
-        given(bookMapper.toResponse(book, mockPictureUrl)).willReturn(bookResponse);
+        given(bookMapper.toResponse(book)).willReturn(bookResponse);
 
         BookResponse response = vendorBookService.getBookById(vendor, 100L);
 
         assertThat(response).isNotNull();
         assertThat(response.id()).isEqualTo(100L);
-        assertThat(response.pictureUrl()).isEqualTo(mockPictureUrl);
     }
 
     @DisplayName("JUnit test for getBookById method - Unauthorized/Not Found")
@@ -127,8 +116,7 @@ public class VendorBookServiceTest {
     public void givenBookRequest_whenCreateBook_thenReturnBookResponse() {
         given(bookMapper.toEntity(bookRequest)).willReturn(book);
         given(bookRepository.save(book)).willReturn(book);
-        given(pictureStorageService.getPictureUrl(book)).willReturn(mockPictureUrl);
-        given(bookMapper.toResponse(book, mockPictureUrl)).willReturn(bookResponse);
+        given(bookMapper.toResponse(book)).willReturn(bookResponse);
 
         BookResponse response = vendorBookService.createBook(vendor, bookRequest);
 
@@ -142,8 +130,7 @@ public class VendorBookServiceTest {
     public void givenValidBookIdAndRequest_whenUpdateBook_thenReturnUpdatedBookResponse() {
         given(bookRepository.findByIdAndUser(100L, vendor)).willReturn(Optional.of(book));
         given(bookRepository.save(book)).willReturn(book);
-        given(pictureStorageService.getPictureUrl(book)).willReturn(mockPictureUrl);
-        given(bookMapper.toResponse(book, mockPictureUrl)).willReturn(bookResponse);
+        given(bookMapper.toResponse(book)).willReturn(bookResponse);
 
         BookResponse response = vendorBookService.updateBook(vendor, 100L, bookRequest);
 
@@ -162,25 +149,7 @@ public class VendorBookServiceTest {
         verify(bookRepository).delete(book);
     }
 
-    @DisplayName("JUnit test for uploadBookPicture method")
-    @Test
-    public void givenMultipartFile_whenUploadBookPicture_thenDelegatesToPictureService() {
-        MultipartFile mockFile = mock(MultipartFile.class);
-        given(bookRepository.findByIdAndUser(100L, vendor)).willReturn(Optional.of(book));
 
-        vendorBookService.uploadBookPicture(vendor, 100L, mockFile);
 
-        verify(pictureStorageService).uploadPicture(book, mockFile);
-    }
 
-    @DisplayName("JUnit test for getRawBookPicture method")
-    @Test
-    public void givenValidBookId_whenGetRawBookPicture_thenReturnByteArrayList() {
-        given(bookRepository.findByIdAndUser(100L, vendor)).willReturn(Optional.of(book));
-
-        byte[] rawPicture = vendorBookService.getRawBookPicture(vendor, 100L);
-
-        assertThat(rawPicture).isNotNull();
-        assertThat(rawPicture).containsExactly(1, 2, 3, 4);
-    }
 }

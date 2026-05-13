@@ -172,19 +172,6 @@ public class VendorBookControllerTest {
     }
 
     @Test
-    @DisplayName("Should return raw byte array for picture GET endpoint")
-    public void givenValidId_whenGetBookPicture_thenReturnImageBytes() throws Exception {
-        byte[] mockBytes = {1, 2, 3};
-        given(vendorBookService.getRawBookPicture(any(User.class), eq(100L))).willReturn(mockBytes);
-
-        mockMvc.perform(get("/api/v1/vendor/books/{id}/picture", 100L)
-                        .with(user(vendor)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.IMAGE_JPEG))
-                .andExpect(content().bytes(mockBytes));
-    }
-
-    @Test
     @DisplayName("Should return 400 Bad Request when creating book with negative quantity")
     public void givenNegativeQuantity_whenCreateBook_thenReturnBadRequest() throws Exception {
         BookRequest invalidRequest = new BookRequest(

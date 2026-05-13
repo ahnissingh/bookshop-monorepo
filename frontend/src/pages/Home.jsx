@@ -20,6 +20,13 @@ export default function Home() {
                 >
                     Go to Dashboard
                 </Link>
+            ) : isAuthenticated && roles.includes('ROLE_CLIENT') ? (
+                <Link
+                    to="/browse"
+                    className="px-5 py-2.5 rounded-lg text-sm font-medium bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors"
+                >
+                    Browse books
+                </Link>
             ) : !isAuthenticated ? (
                 <div className="flex gap-3">
                     <Link

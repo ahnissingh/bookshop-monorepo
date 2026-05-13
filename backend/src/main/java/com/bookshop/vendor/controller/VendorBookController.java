@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -71,20 +70,5 @@ public class VendorBookController {
         return ResponseEntity.ok(ApiResponse.success(null, "Picture uploaded successfully"));
     }
 
-    // we do NOT return an ApiResponse wrapping the data here.
-    // We return raw bytes with an image content-type so the browser can render it directly
-    @GetMapping("/{id}/picture")
-    public ResponseEntity<byte[]> getBookPicture(
-            @AuthenticationPrincipal User vendor, @PathVariable Long id) {
-        byte[] imageBytes = vendorBookService.getRawBookPicture(vendor, id);
 
-        if (imageBytes == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .header(HttpHeaders.CACHE_CONTROL, "max-age=86400")
-                .body(imageBytes);
-    }
 }

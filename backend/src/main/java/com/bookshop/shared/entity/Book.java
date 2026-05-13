@@ -36,11 +36,9 @@ public class Book {
     @Column(name = "grade", length = 50)
     private String grade;
 
-    // Phase 1: BLOB storage. We use byte[] to hold the image data.
-    // In Phase 2, we will change this to ` String pictureUrl;` and drop @Lob.
-    @Lob
-    @Column(name = "picture", columnDefinition = "LONGBLOB")
-    private byte[] picture;
+
+    @Column(name = "picture_url")
+    private String pictureUrl;
 
     @Column(columnDefinition = "TEXT")
     private String description;

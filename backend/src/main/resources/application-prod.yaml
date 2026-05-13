@@ -2,14 +2,18 @@ spring:
   #This is a fallback for amazon ses as it ses is yet for approval but works in sandbox that is allows only allowed emails to receive emails
   mail:
     host: smtp.sendgrid.net
-    port: 2525
+    port: 465
     username: apikey
     password: ${SENDGRID_API_PASSWORD}
     properties:
       mail:
         smtp:
           auth: true
-          starttls:
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+            fallback: false
+          ssl:
             enable: true
   datasource:
     url: ${SPRING_DATASOURCE_URL}
@@ -61,7 +65,7 @@ cors:
 
 app:
   email:
-    provider: "sendgrid"  #'ses' for aws ses and 'sendgrid' for sendgrid
+    provider: ${EMAIL_PROVIDER:sendgrid}  #'ses' for aws ses and 'sendgrid' for sendgrid
   frontend:
     url: https://bookstacks.store
   aws:

@@ -81,6 +81,7 @@ jobs:
                     --name mybookshop-backend \
                     -p 8080:8080 \
                     -e SPRING_PROFILES_ACTIVE=prod \
+                    -e EMAIL_PROVIDER="sendgrid" \  
                     -e SPRING_DATASOURCE_URL="jdbc:mysql://database-1.c7240iwoykau.ap-south-1.rds.amazonaws.com:3306/bookshop_db?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false" \
                     -e SPRING_DATASOURCE_USERNAME="${{ secrets.DB_USERNAME }}" \
                     -e SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \

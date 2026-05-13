@@ -63,6 +63,7 @@ cors:
   allowed-headers:
     - "*"
 
+
 app:
   email:
     provider: ${EMAIL_PROVIDER:sendgrid}  #'ses' for aws ses and 'sendgrid' for sendgrid

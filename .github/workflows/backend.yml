@@ -71,25 +71,25 @@ jobs:
             
             # 2. Pull the latest image
             docker pull 907260787573.dkr.ecr.ap-south-1.amazonaws.com/ahnis/mybookshop:latest
-            
+
             # 3. Stop and remove the old container if it exists
             docker stop mybookshop-backend || true
             docker rm mybookshop-backend || true
-            
-            # 4. Run the new container
+
+            # 4. Run the new container (NO SPACES AFTER THE BACKSLASHES!)
                     docker run -d \
-                    --name mybookshop-backend \
-                    -p 8080:8080 \
-                    -e SPRING_PROFILES_ACTIVE=prod \
-                    -e EMAIL_PROVIDER="sendgrid" \  
-                    -e SPRING_DATASOURCE_URL="jdbc:mysql://database-1.c7240iwoykau.ap-south-1.rds.amazonaws.com:3306/bookshop_db?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false" \
-                    -e SPRING_DATASOURCE_USERNAME="${{ secrets.DB_USERNAME }}" \
-                    -e SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-                    -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
-                    -e CORS_ALLOWED_ORIGINS="https://bookstacks.store" \
-                    -e SENDGRID_API_PASSWORD="${{ secrets.SENDGRID_API_PASSWORD }}" \
-                    -e AWS_ACCESS_KEY="${{ secrets.AWS_ACCESS_KEY_ID }}" \
-                    -e AWS_SECRET_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
-                    -e SQS_NOTIFICATION_QUEUE_URL="${{ secrets.SQS_NOTIFICATION_QUEUE_URL }}" \
-                    --restart unless-stopped \
-                    907260787573.dkr.ecr.ap-south-1.amazonaws.com/ahnis/mybookshop:latest
+                      --name mybookshop-backend \
+                      -p 8080:8080 \
+                      -e SPRING_PROFILES_ACTIVE=prod \
+                      -e EMAIL_PROVIDER="sendgrid" \
+                      -e SPRING_DATASOURCE_URL="jdbc:mysql://database-1.c7240iwoykau.ap-south-1.rds.amazonaws.com:3306/bookshop_db?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false" \
+                      -e SPRING_DATASOURCE_USERNAME="${{ secrets.DB_USERNAME }}" \
+                      -e SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+                      -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
+                      -e CORS_ALLOWED_ORIGINS="https://bookstacks.store" \
+                      -e SENDGRID_API_PASSWORD="${{ secrets.SENDGRID_API_PASSWORD }}" \
+                      -e AWS_ACCESS_KEY="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+                      -e AWS_SECRET_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+                      -e SQS_NOTIFICATION_QUEUE_URL="${{ secrets.SQS_NOTIFICATION_QUEUE_URL }}" \
+                      --restart unless-stopped \
+                      907260787573.dkr.ecr.ap-south-1.amazonaws.com/ahnis/mybookshop:latest

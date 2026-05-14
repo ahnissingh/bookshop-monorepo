@@ -79,6 +79,10 @@ jobs:
             # 4. Run the new container (NO SPACES AFTER THE BACKSLASHES!)
                     docker run -d \
                       --name mybookshop-backend \
+                      --log-driver=awslogs \
+                      --log-opt awslogs-region=ap-south-1 \
+                      --log-opt awslogs-group=/bookstacks/prod/backend \
+                      --log-opt awslogs-create-group=true \
                       -p 8080:8080 \
                       -e SPRING_PROFILES_ACTIVE=prod \
                       -e EMAIL_PROVIDER="sendgrid" \

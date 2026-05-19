@@ -2,10 +2,12 @@ package com.bookshop.vendor.service;
 
 import com.bookshop.shared.entity.Book;
 import com.bookshop.shared.entity.User;
+import com.bookshop.shared.mapper.BookMapper;
 import com.bookshop.shared.repository.BookRepository;
 import com.bookshop.vendor.dto.BookRequest;
 import com.bookshop.vendor.dto.BookResponse;
-import com.bookshop.shared.mapper.BookMapper;
+import com.bookshop.vendor.dto.VendorBookFilterRequest;
+import com.bookshop.vendor.service.image.PictureStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -26,6 +30,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -38,6 +43,9 @@ public class VendorBookServiceTest {
 
     @Mock
     private BookMapper bookMapper;
+
+    @Mock
+    private PictureStorageService pictureStorageService;
 
     @InjectMocks
     private VendorBookService vendorBookService;
@@ -69,20 +77,23 @@ public class VendorBookServiceTest {
         );
 
         bookResponse = new BookResponse(
-                100L, "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book", 10, "dummyUrl", Instant.now()
+                100L, "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book", 10, "dummyUrl", Instant.now(),Instant.now()
         );
     }
 
-    @DisplayName("JUnit test for getMyBooks method")
+    @DisplayName("JUnit test for getMyBooks method with filters")
     @Test
     public void givenVendorAndPageable_whenGetMyBooks_thenReturnPaginatedBooks() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Book> bookPage = new PageImpl<>(List.of(book));
+        // Creating an empty filter request
+        VendorBookFilterRequest filterRequest = new VendorBookFilterRequest(null, null, null, null, null);
 
-        given(bookRepository.findByUser(vendor, pageable)).willReturn(bookPage);
+        // We mock Specification match since we moved to Specification
+        given(bookRepository.findAll(any(Specification.class), eq(pageable))).willReturn(bookPage);
         given(bookMapper.toResponse(book)).willReturn(bookResponse);
 
-        Page<BookResponse> responsePage = vendorBookService.getMyBooks(vendor, pageable);
+        Page<BookResponse> responsePage = vendorBookService.getMyBooks(vendor, filterRequest, pageable);
 
         assertThat(responsePage).isNotNull();
         assertThat(responsePage.getContent()).hasSize(1);
@@ -111,28 +122,27 @@ public class VendorBookServiceTest {
         verify(bookMapper, never()).toResponse(any(Book.class), any());
     }
 
-    @DisplayName("JUnit test for createBook method")
+    @DisplayName("JUnit test for createBookWithPicture method")
     @Test
-    public void givenBookRequest_whenCreateBook_thenReturnBookResponse() {
+    public void givenBookRequest_whenCreateBookWithPicture_thenReturnBookResponse() {
         given(bookMapper.toEntity(bookRequest)).willReturn(book);
-        given(bookRepository.save(book)).willReturn(book);
+        given(bookRepository.save(any(Book.class))).willReturn(book);
         given(bookMapper.toResponse(book)).willReturn(bookResponse);
 
-        BookResponse response = vendorBookService.createBook(vendor, bookRequest);
+        BookResponse response = vendorBookService.createBookWithPicture(vendor, bookRequest, null);
 
         assertThat(response).isNotNull();
-        assertThat(book.getUser()).isEqualTo(vendor); 
-        verify(bookRepository).save(book);
+        assertThat(book.getUser()).isEqualTo(vendor);
     }
 
-    @DisplayName("JUnit test for updateBook method")
+    @DisplayName("JUnit test for updateBook method with MultiPart integration")
     @Test
     public void givenValidBookIdAndRequest_whenUpdateBook_thenReturnUpdatedBookResponse() {
         given(bookRepository.findByIdAndUser(100L, vendor)).willReturn(Optional.of(book));
         given(bookRepository.save(book)).willReturn(book);
         given(bookMapper.toResponse(book)).willReturn(bookResponse);
 
-        BookResponse response = vendorBookService.updateBook(vendor, 100L, bookRequest);
+        BookResponse response = vendorBookService.updateBook(vendor, 100L, bookRequest, null);
 
         assertThat(response).isNotNull();
         verify(bookMapper).updateEntityFromRequest(bookRequest, book);
@@ -148,8 +158,4 @@ public class VendorBookServiceTest {
 
         verify(bookRepository).delete(book);
     }
-
-
-
-
 }

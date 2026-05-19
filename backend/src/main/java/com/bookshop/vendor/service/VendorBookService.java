@@ -7,11 +7,14 @@ import com.bookshop.vendor.dto.BookRequest;
 import com.bookshop.vendor.dto.BookResponse;
 import com.bookshop.shared.mapper.BookMapper;
 import com.bookshop.shared.repository.BookRepository;
+import com.bookshop.vendor.dto.VendorBookFilterRequest;
 import com.bookshop.vendor.service.image.PictureStorageService;
+import com.bookshop.vendor.specification.VendorBookSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,12 +35,13 @@ public class VendorBookService {
     }
 
 
+
     @Transactional(readOnly = true)
-    public Page<BookResponse> getMyBooks(User vendor, Pageable pageable) {
-        return bookRepository.findByUser(vendor, pageable)
+    public Page<BookResponse> getMyBooks(User vendor, VendorBookFilterRequest filterRequest, Pageable pageable) {
+        Specification<Book> spec = VendorBookSpecification.withFilters(filterRequest, vendor);
+        return bookRepository.findAll(spec, pageable)
                 .map(bookMapper::toResponse);
     }
-
     @Transactional(readOnly = true)
     public BookResponse getBookById(User vendor, Long bookId) {
         Book book = getVerifiedBook(vendor, bookId);
@@ -54,12 +58,21 @@ public class VendorBookService {
     }
 
     @Transactional
-    public BookResponse updateBook(User vendor, Long bookId, BookRequest request) {
+    public BookResponse updateBook(User vendor, Long bookId, BookRequest request, MultipartFile file) {
         Book book = getVerifiedBook(vendor, bookId);
 
         bookMapper.updateEntityFromRequest(request, book);
+
+        if (file != null && !file.isEmpty()) {
+            pictureStorageService.uploadPicture(book, file);
+            String publicUrl = pictureStorageService.getPictureUrl(book);
+
+            book.setPictureUrl(publicUrl + "?v=" + System.currentTimeMillis());
+        }
+
         Book updatedBook = bookRepository.save(book);
 
+        // 5. Ab return karo modified entity
         return bookMapper.toResponse(updatedBook);
     }
 
@@ -74,7 +87,6 @@ public class VendorBookService {
     public void uploadBookPicture(User vendor, Long bookId, MultipartFile file) {
         Book book = getVerifiedBook(vendor, bookId);
 
-        // Let the strategy (DB or S3) handle the actual saving
         pictureStorageService.uploadPicture(book, file);
         String publicUrl = pictureStorageService.getPictureUrl(book);
         //Now I attach the pictureUrl as a string in the book table
@@ -83,10 +95,28 @@ public class VendorBookService {
     }
 
 
-
-
     private Book getVerifiedBook(User vendor, Long bookId) {
         return bookRepository.findByIdAndUser(bookId, vendor)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found or you are not authorized to access it"));
     }
+
+    @Transactional
+    public BookResponse createBookWithPicture(User vendor, BookRequest request, MultipartFile file) {
+        Book book = bookMapper.toEntity(request);
+        book.setUser(vendor);
+
+        Book savedBook = bookRepository.save(book);
+
+        if (file != null && !file.isEmpty()) {
+            pictureStorageService.uploadPicture(savedBook, file);
+            String publicUrl = pictureStorageService.getPictureUrl(savedBook);
+
+            savedBook.setPictureUrl(publicUrl + "?v=" + System.currentTimeMillis());
+
+            savedBook = bookRepository.save(savedBook);
+        }
+
+        return bookMapper.toResponse(savedBook);
+    }
+
 }

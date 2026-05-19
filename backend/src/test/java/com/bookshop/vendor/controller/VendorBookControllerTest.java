@@ -12,6 +12,7 @@ import com.bookshop.shared.entity.Role;
 import com.bookshop.shared.entity.User;
 import com.bookshop.vendor.dto.BookRequest;
 import com.bookshop.vendor.dto.BookResponse;
+import com.bookshop.vendor.dto.VendorBookFilterRequest;
 import com.bookshop.vendor.service.VendorBookService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +23,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -70,7 +70,6 @@ public class VendorBookControllerTest {
     @MockitoBean
     private CustomUserDetailsService userDetailsService;
 
-
     private User vendor;
     private User client;
     private BookRequest bookRequest;
@@ -100,14 +99,15 @@ public class VendorBookControllerTest {
         );
 
         bookResponse = new BookResponse(
-                100L, "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book", 20, "/api/v1/vendor/books/100/picture", Instant.now()
+                100L, "Spring Boot Mastery", "Ahnis Singh", "A deep dive", BigDecimal.valueOf(29.99), "New", "Great book", 20, "/api/v1/vendor/books/100/picture", Instant.now(),Instant.now()
         );
     }
 
     @Test
-    @DisplayName("Should return paginated books for authorized vendor")
+    @DisplayName("Should return paginated books for authorized vendor with FilterRequest")
     public void givenVendor_whenGetMyBooks_thenReturnSuccess() throws Exception {
-        given(vendorBookService.getMyBooks(any(User.class), any())).willReturn(new PageImpl<>(List.of(bookResponse), PageRequest.of(0, 10), 1));
+        given(vendorBookService.getMyBooks(any(User.class), any(VendorBookFilterRequest.class), any()))
+                .willReturn(new PageImpl<>(List.of(bookResponse), PageRequest.of(0, 10), 1));
 
         mockMvc.perform(get("/api/v1/vendor/books")
                         .with(user(vendor)))
@@ -117,30 +117,37 @@ public class VendorBookControllerTest {
     }
 
     @Test
-    @DisplayName("Should create a book for authorized vendor")
+    @DisplayName("Should create a book (Multipart JSON + File) for authorized vendor")
     public void givenValidRequest_whenCreateBook_thenReturnSuccess() throws Exception {
-        given(vendorBookService.createBook(any(User.class), any(BookRequest.class))).willReturn(bookResponse);
+        given(vendorBookService.createBookWithPicture(any(User.class), any(BookRequest.class), any())).willReturn(bookResponse);
 
-        mockMvc.perform(post("/api/v1/vendor/books")
+        MockMultipartFile bookPart = new MockMultipartFile(
+                "book", "", "application/json", objectMapper.writeValueAsBytes(bookRequest)
+        );
+
+        mockMvc.perform(multipart("/api/v1/vendor/books")
+                        .file(bookPart)
                         .with(user(vendor))
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookRequest)))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Book created successfully"))
                 .andExpect(jsonPath("$.data.title").value("Spring Boot Mastery"));
     }
 
     @Test
-    @DisplayName("Should update book for authorized vendor")
+    @DisplayName("Should update book (Multipart JSON + File) for authorized vendor")
     public void givenValidRequest_whenUpdateBook_thenReturnSuccess() throws Exception {
-        given(vendorBookService.updateBook(any(User.class), eq(100L), any(BookRequest.class))).willReturn(bookResponse);
+        given(vendorBookService.updateBook(any(User.class), eq(100L), any(BookRequest.class), any())).willReturn(bookResponse);
 
-        mockMvc.perform(put("/api/v1/vendor/books/{id}", 100L)
+        MockMultipartFile bookPart = new MockMultipartFile(
+                "book", "", "application/json", objectMapper.writeValueAsBytes(bookRequest)
+        );
+
+        mockMvc.perform(multipart("/api/v1/vendor/books/{id}", 100L)
+                        .file(bookPart)
+                        .with(request -> { request.setMethod("PUT"); return request; })
                         .with(user(vendor))
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookRequest)))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Book updated successfully"));
     }
@@ -158,43 +165,28 @@ public class VendorBookControllerTest {
     }
 
     @Test
-    @DisplayName("Should successfully upload multipart picture")
-    public void givenMultipartFile_whenUploadPicture_thenReturnSuccess() throws Exception {
-        MockMultipartFile mockFile = new MockMultipartFile("file", "cover.jpg", "image/jpeg", "image data".getBytes());
-        willDoNothing().given(vendorBookService).uploadBookPicture(any(User.class), eq(100L), any());
-
-        mockMvc.perform(multipart("/api/v1/vendor/books/{id}/picture", 100L)
-                        .file(mockFile)
-                        .with(user(vendor))
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Picture uploaded successfully"));
-    }
-
-    @Test
-    @DisplayName("Should return 400 Bad Request when creating book with negative quantity")
+    @DisplayName("Should return 400 Bad Request when creating book with negative quantity via Multipart")
     public void givenNegativeQuantity_whenCreateBook_thenReturnBadRequest() throws Exception {
         BookRequest invalidRequest = new BookRequest(
                 "Title", "Author", "Subtitle", BigDecimal.TEN, "New", "Desc", -5
         );
 
-        mockMvc.perform(post("/api/v1/vendor/books")
+        MockMultipartFile bookPart = new MockMultipartFile(
+                "book", "", "application/json", objectMapper.writeValueAsBytes(invalidRequest)
+        );
+
+        mockMvc.perform(multipart("/api/v1/vendor/books")
+                        .file(bookPart)
                         .with(user(vendor))
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
-
                 .andExpect(jsonPath("$.error").value("Validation Failed"))
-
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Quantity cannot be negative")));
     }
 
-    //Some security test
     @Test
     @DisplayName("Should return 403 Forbidden when a Client tries to access Vendor endpoints")
     public void givenClientUser_whenGetMyBooks_thenReturnsForbidden() throws Exception {
-        // Because the controller requires 'ROLE_VENDOR', sending a user with 'ROLE_CLIENT' should fail
         mockMvc.perform(get("/api/v1/vendor/books")
                         .with(user(client)))
                 .andExpect(status().isForbidden());

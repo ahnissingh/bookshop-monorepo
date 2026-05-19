@@ -1,6 +1,6 @@
 package com.bookshop.client.controller;
 
-import com.bookshop.client.dto.BookSearchFilterRequest;
+import com.bookshop.client.dto.ClientBookSearchFilterRequest;
 import com.bookshop.client.dto.ClientBookResponse;
 import com.bookshop.client.service.ClientBookService;
 import com.bookshop.shared.dto.ApiResponse;
@@ -24,7 +24,7 @@ public class ClientController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ClientBookResponse>>> browseBooks(
-            BookSearchFilterRequest filterRequest,
+            ClientBookSearchFilterRequest filterRequest,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,

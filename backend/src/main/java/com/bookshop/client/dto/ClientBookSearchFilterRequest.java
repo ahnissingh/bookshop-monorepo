@@ -4,7 +4,7 @@ package com.bookshop.client.dto;
 import java.math.BigDecimal;
 import java.util.List;
 
-public record BookSearchFilterRequest(
+public record ClientBookSearchFilterRequest(
         String search,          // Universal search for title, author, subtitle
         BigDecimal minPrice,
         BigDecimal maxPrice,

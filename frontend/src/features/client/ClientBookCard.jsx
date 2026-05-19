@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { bookCoverSrcFromBook } from '../../utils/bookCoverSrc';
 
 function ClientBookCardCover({ book }) {
     const [imgError, setImgError] = useState(false);
-    const imageUrl = book.pictureUrl || null;
+    const imageUrl = bookCoverSrcFromBook(book);
     const inStock = book.quantity > 0;
 
     return (
@@ -44,7 +45,7 @@ function ClientBookCardCover({ book }) {
 
 export default function ClientBookCard({ book }) {
     const vendorUsername = book.vendor?.username;
-    const coverKey = `${book.id}-${book.pictureUrl || ''}`;
+    const coverKey = `${book.id}-${book.updatedAt ?? ''}`;
 
     return (
         <Link

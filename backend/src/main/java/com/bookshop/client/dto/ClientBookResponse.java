@@ -14,5 +14,7 @@ public record ClientBookResponse(
         Integer quantity,
         String pictureUrl,
         Instant createdAt,
+        Instant updatedAt,
         VendorSummary vendor
-) {}
+) {
+}

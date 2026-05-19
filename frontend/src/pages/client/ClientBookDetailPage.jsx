@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getClientBookById } from '../../api/clientBookApi';
+import { bookCoverSrcFromBook } from '../../utils/bookCoverSrc';
 
 function ClientDetailHeroImage({ book }) {
     const [imgError, setImgError] = useState(false);
-    const imageUrl = book.pictureUrl || null;
+    const imageUrl = bookCoverSrcFromBook(book);
     const inStock = book.quantity > 0;
 
     return (
@@ -105,7 +106,7 @@ export default function ClientBookDetailPage() {
     }
 
     const vendor = book.vendor;
-    const heroKey = `${book.id}-${book.pictureUrl || ''}`;
+    const heroKey = `${book.id}-${book.updatedAt ?? ''}`;
 
     return (
         <div className="max-w-4xl mx-auto">

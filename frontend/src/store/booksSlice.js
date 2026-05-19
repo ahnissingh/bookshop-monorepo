@@ -3,9 +3,9 @@ import * as bookApi from '../api/bookApi';
 
 export const fetchBooks = createAsyncThunk(
     'books/fetchBooks',
-    async ({ page = 0, size = 10, sort = 'createdAt,desc' }, { rejectWithValue }) => {
+    async (filters, { rejectWithValue }) => {
         try {
-            const response = await bookApi.getMyBooks(page, size, sort);
+            const response = await bookApi.getMyBooks(filters);
             return response.data.data;
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || 'Failed to fetch books');
@@ -15,9 +15,9 @@ export const fetchBooks = createAsyncThunk(
 
 export const createBookThunk = createAsyncThunk(
     'books/createBook',
-    async (data, { rejectWithValue }) => {
+    async (formData, { rejectWithValue }) => {
         try {
-            const response = await bookApi.createBook(data);
+            const response = await bookApi.createBook(formData);
             return response.data.data;
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || 'Failed to create book');
@@ -27,9 +27,9 @@ export const createBookThunk = createAsyncThunk(
 
 export const updateBookThunk = createAsyncThunk(
     'books/updateBook',
-    async ({ id, data }, { rejectWithValue }) => {
+    async ({ id, formData }, { rejectWithValue }) => {
         try {
-            const response = await bookApi.updateBook(id, data);
+            const response = await bookApi.updateBook(id, formData);
             return response.data.data;
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || 'Failed to update book');
@@ -49,18 +49,6 @@ export const deleteBookThunk = createAsyncThunk(
     }
 );
 
-export const uploadImageThunk = createAsyncThunk(
-    'books/uploadImage',
-    async ({ id, file }, { rejectWithValue }) => {
-        try {
-            await bookApi.uploadBookImage(id, file);
-            return id;
-        } catch (err) {
-            return rejectWithValue(err.response?.data?.message || 'Failed to upload image');
-        }
-    }
-);
-
 const booksSlice = createSlice({
     name: 'books',
     initialState: {
@@ -68,7 +56,7 @@ const booksSlice = createSlice({
         totalPages: 0,
         totalElements: 0,
         currentPage: 0,
-        pageSize: 10,
+        pageSize: 12,
         isFirst: true,
         isLast: true,
         loading: 'idle',

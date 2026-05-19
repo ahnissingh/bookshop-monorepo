@@ -1,8 +1,8 @@
-package com.bookshop.client.specification;
+package com.bookshop.vendor.specification;
 
-import com.bookshop.client.dto.ClientBookSearchFilterRequest;
+import com.bookshop.vendor.dto.VendorBookFilterRequest;
 import com.bookshop.shared.entity.Book;
-import jakarta.persistence.criteria.JoinType;
+import com.bookshop.shared.entity.User;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
@@ -10,24 +10,21 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BookSpecification {
+public class VendorBookSpecification {
 
-    public static Specification<Book> withFilters(ClientBookSearchFilterRequest request) {
+    public static Specification<Book> withFilters(VendorBookFilterRequest request, User vendor) {
         return (root, query, criteriaBuilder) -> {
-
-            // We must skip this for the Count query, otherwise Hibernate throws an exception
-            if (query.getResultType() != Long.class && query.getResultType() != long.class) {
-                root.fetch("user", JoinType.INNER);
-            }
-
             List<Predicate> predicates = new ArrayList<>();
 
+            // Vendor can only see their OWN books
+            predicates.add(criteriaBuilder.equal(root.get("user"), vendor));
+
+            // Apply all other filters dynamically
             if (StringUtils.hasText(request.search())) {
                 String searchPattern = "%" + request.search().toLowerCase() + "%";
                 Predicate titleMatch = criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), searchPattern);
                 Predicate authorMatch = criteriaBuilder.like(criteriaBuilder.lower(root.get("author")), searchPattern);
                 Predicate subtitleMatch = criteriaBuilder.like(criteriaBuilder.lower(root.get("subtitle")), searchPattern);
-
                 predicates.add(criteriaBuilder.or(titleMatch, authorMatch, subtitleMatch));
             }
 
@@ -43,10 +40,10 @@ public class BookSpecification {
                 predicates.add(root.get("grade").in(request.grades()));
             }
 
-            if (request.isInStockOnly()) {
-                predicates.add(criteriaBuilder.greaterThan(root.get("quantity"), 0));
+            // Vendor Specific Out-of-Stock check  so they know what to refill
+            if (Boolean.TRUE.equals(request.outOfStockOnly())) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("quantity"), 0));
             }
-
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }

@@ -14,5 +14,6 @@ public record BookResponse(
         String description,
         Integer quantity,
         String pictureUrl,
-        Instant createdAt
+        Instant createdAt,
+        Instant updatedAt
 ) {}

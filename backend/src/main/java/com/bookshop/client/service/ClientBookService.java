@@ -1,12 +1,11 @@
 package com.bookshop.client.service;
-import com.bookshop.client.dto.BookSearchFilterRequest;
+import com.bookshop.client.dto.ClientBookSearchFilterRequest;
 import com.bookshop.client.dto.ClientBookResponse;
 import com.bookshop.client.specification.BookSpecification;
 import com.bookshop.shared.entity.Book;
 import com.bookshop.shared.exception.ResourceNotFoundException;
 import com.bookshop.shared.mapper.BookMapper;
 import com.bookshop.shared.repository.BookRepository;
-import com.bookshop.vendor.service.image.PictureStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,7 +23,7 @@ public class ClientBookService {
     private final BookMapper bookMapper;
 
     @Transactional(readOnly = true)
-    public Page<ClientBookResponse> getAllBooks(BookSearchFilterRequest filterRequest, Pageable pageable) {
+    public Page<ClientBookResponse> getAllBooks(ClientBookSearchFilterRequest filterRequest, Pageable pageable) {
         log.info("Fetching books with filters: {}", filterRequest);
 
         Specification<Book> spec = BookSpecification.withFilters(filterRequest);

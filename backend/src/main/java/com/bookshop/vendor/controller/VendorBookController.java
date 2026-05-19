@@ -4,12 +4,15 @@ import com.bookshop.shared.dto.ApiResponse;
 import com.bookshop.shared.entity.User;
 import com.bookshop.vendor.dto.BookRequest;
 import com.bookshop.vendor.dto.BookResponse;
+import com.bookshop.vendor.dto.VendorBookFilterRequest;
 import com.bookshop.vendor.service.VendorBookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,11 +30,19 @@ public class VendorBookController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<BookResponse>>> getMyBooks(
-            @AuthenticationPrincipal User vendor, Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(
-                vendorBookService.getMyBooks(vendor, pageable), "Books fetched successfully"));
-    }
+            @AuthenticationPrincipal User vendor,
+            VendorBookFilterRequest filterRequest,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
 
+        Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        return ResponseEntity.ok(ApiResponse.success(
+                vendorBookService.getMyBooks(vendor, filterRequest, pageable), "Books fetched successfully"));
+    }
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<BookResponse>> getBookById(
             @AuthenticationPrincipal User vendor, @PathVariable Long id) {
@@ -39,20 +50,30 @@ public class VendorBookController {
                 vendorBookService.getBookById(vendor, id), "Book fetched successfully"));
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<BookResponse>> createBook(
-            @AuthenticationPrincipal User vendor, @Valid @RequestBody BookRequest request) {
+            @AuthenticationPrincipal User vendor,
+            @Valid @RequestPart("book") BookRequest request, // JSON part
+            @RequestPart(value = "file", required = false) MultipartFile file) { // File part (optional rakha hai incase bina photo ke book daalni ho)
+
+        log.info("Vendor {} creating book {} with picture attached: {}", vendor.getUsername(), request.title(), file != null);
+
         return ResponseEntity.ok(ApiResponse.success(
-                vendorBookService.createBook( vendor, request), "Book created successfully"));
+                vendorBookService.createBookWithPicture(vendor, request, file), "Book created successfully"));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<BookResponse>> updateBook(
-            @AuthenticationPrincipal User vendor, @PathVariable Long id, @Valid @RequestBody BookRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(
-                vendorBookService.updateBook(vendor, id, request), "Book updated successfully"));
-    }
+            @AuthenticationPrincipal User vendor,
+            @PathVariable Long id,
+            @Valid @RequestPart("book") BookRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
 
+        log.info("Vendor {} updating book ID {} with new picture attached: {}", vendor.getUsername(), id, file != null);
+
+        return ResponseEntity.ok(ApiResponse.success(
+                vendorBookService.updateBook(vendor, id, request, file), "Book updated successfully"));
+    }
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteBook(
             @AuthenticationPrincipal User vendor, @PathVariable Long id) {
@@ -61,14 +82,6 @@ public class VendorBookController {
     }
 
 
-    @PostMapping(value = "/{id}/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<Void>> uploadPicture(
-            @AuthenticationPrincipal User vendor,
-            @PathVariable Long id,
-            @RequestParam("file") MultipartFile file) {
-        vendorBookService.uploadBookPicture(vendor, id, file);
-        return ResponseEntity.ok(ApiResponse.success(null, "Picture uploaded successfully"));
-    }
 
 
 }

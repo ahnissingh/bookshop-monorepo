@@ -157,11 +157,39 @@ export default function Register() {
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <label className={labelClass}>First Name</label>
-                                <input {...register("firstName", { required: true })} className={inputClass} />
+                                <input
+                                    {...register("firstName", {
+                                        required: "First name is required",
+                                        validate: (v) =>
+                                            (typeof v === 'string' && v.trim().length > 0) ||
+                                            "First name is required",
+                                    })}
+                                    aria-invalid={errors.firstName ? 'true' : 'false'}
+                                    className={inputClass}
+                                />
+                                {errors.firstName && (
+                                    <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                                        {errors.firstName.message}
+                                    </p>
+                                )}
                             </div>
                             <div>
                                 <label className={labelClass}>Last Name</label>
-                                <input {...register("lastName", { required: true })} className={inputClass} />
+                                <input
+                                    {...register("lastName", {
+                                        required: "Last name is required",
+                                        validate: (v) =>
+                                            (typeof v === 'string' && v.trim().length > 0) ||
+                                            "Last name is required",
+                                    })}
+                                    aria-invalid={errors.lastName ? 'true' : 'false'}
+                                    className={inputClass}
+                                />
+                                {errors.lastName && (
+                                    <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                                        {errors.lastName.message}
+                                    </p>
+                                )}
                             </div>
                         </div>
                         <div>

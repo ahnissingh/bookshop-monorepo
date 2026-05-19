@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { updateBookThunk } from '../../store/booksSlice';
-import { getBookById } from '../../api/bookApi';
+import { getBookById, buildVendorBookFormData } from '../../api/bookApi';
+import { bookCoverSrc } from '../../utils/bookCoverSrc';
 import BookForm from '../../features/books/BookForm';
 import { addToast } from '../../store/toastSlice';
 
@@ -27,12 +28,13 @@ export default function EditBookPage() {
             }
         };
         load();
-    }, [id, navigate, addToast]);
+    }, [id, navigate, dispatch]);
 
-    const handleSubmit = async (data) => {
+    const handleSubmit = async ({ book: bookData, file }) => {
         setIsSubmitting(true);
         try {
-            await dispatch(updateBookThunk({ id: Number(id), data })).unwrap();
+            const formData = buildVendorBookFormData(bookData, file);
+            await dispatch(updateBookThunk({ id: Number(id), formData })).unwrap();
             dispatch(addToast('Book updated successfully', 'success'));
             navigate('/dashboard');
         } catch (err) {
@@ -42,9 +44,21 @@ export default function EditBookPage() {
         }
     };
 
+    const formDefaults = book
+        ? {
+            title: book.title ?? '',
+            author: book.author ?? '',
+            subtitle: book.subtitle ?? '',
+            price: book.price ?? '',
+            quantity: book.quantity ?? '',
+            grade: book.grade ?? '',
+            description: book.description ?? '',
+        }
+        : null;
+
     if (loadingBook) {
         return (
-            <div className="max-w-2xl">
+            <div className="max-w-3xl">
                 <div className="animate-pulse space-y-4">
                     <div className="h-4 w-24 bg-slate-200 dark:bg-slate-800 rounded" />
                     <div className="h-6 w-48 bg-slate-200 dark:bg-slate-800 rounded" />
@@ -59,9 +73,10 @@ export default function EditBookPage() {
     }
 
     return (
-        <div className="max-w-2xl">
+        <div className="max-w-3xl">
             <div className="mb-6">
                 <button
+                    type="button"
                     onClick={() => navigate('/dashboard')}
                     className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors mb-3"
                 >
@@ -71,12 +86,13 @@ export default function EditBookPage() {
                     Back to Books
                 </button>
                 <h1 className="text-xl font-bold text-slate-900 dark:text-slate-50">Edit Book</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Update the details for {book?.title}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Update details for {book?.title}</p>
             </div>
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
                 <BookForm
                     onSubmit={handleSubmit}
-                    defaultValues={book}
+                    defaultValues={formDefaults}
+                    existingImageUrl={bookCoverSrc(book?.pictureUrl, book?.updatedAt)}
                     isSubmitting={isSubmitting}
                     submitLabel="Update Book"
                 />

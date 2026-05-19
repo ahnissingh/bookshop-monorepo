@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { createBookThunk } from '../../store/booksSlice';
+import { buildVendorBookFormData } from '../../api/bookApi';
 import BookForm from '../../features/books/BookForm';
 import { addToast } from '../../store/toastSlice';
 
@@ -10,10 +11,11 @@ export default function AddBookPage() {
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = async (data) => {
+    const handleSubmit = async ({ book, file }) => {
         setIsSubmitting(true);
         try {
-            await dispatch(createBookThunk(data)).unwrap();
+            const formData = buildVendorBookFormData(book, file);
+            await dispatch(createBookThunk(formData)).unwrap();
             dispatch(addToast('Book created successfully', 'success'));
             navigate('/dashboard');
         } catch (err) {
@@ -24,9 +26,10 @@ export default function AddBookPage() {
     };
 
     return (
-        <div className="max-w-2xl">
+        <div className="max-w-3xl">
             <div className="mb-6">
                 <button
+                    type="button"
                     onClick={() => navigate('/dashboard')}
                     className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors mb-3"
                 >
@@ -36,9 +39,9 @@ export default function AddBookPage() {
                     Back to Books
                 </button>
                 <h1 className="text-xl font-bold text-slate-900 dark:text-slate-50">Add New Book</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Fill in the details to list a new book</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">List a book with optional cover image in one step</p>
             </div>
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
                 <BookForm onSubmit={handleSubmit} isSubmitting={isSubmitting} submitLabel="Create Book" />
             </div>
         </div>

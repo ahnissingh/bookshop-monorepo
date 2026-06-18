@@ -3,3 +3,4 @@ spring:
     name: bookshop-backend
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+
